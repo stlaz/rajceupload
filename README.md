@@ -23,3 +23,25 @@ Nefuncionální požadavky:
 -2 části - plugin a nezávislá aplikace
 
 -------------------------------------------------------
+
+GUI - poznamky:
+=============================
+Pictures display, selection!
+Notification area - upload progress bar + messages about the progress
+----
+Login Activity - dont forget display rotation
+
+-------------------------------------------------------
+
+API
+=============================
+Login + ukladani prihlaseni
+Vytvareni alb, vyuziti soucasnych alb
+Nastudovat upload - informuje nas o stavu uploadovaneho?
+Kdyz malo prace - nastudovat zbytek API
+
+------------------------------------------------------
+
+Android
+=============================
+Ziskani vsech fotografii - do budoucna: razeni podle casu, filtrace podle casu (posledni fota) a nazvu slozek
