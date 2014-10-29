@@ -28,7 +28,39 @@ public class UploadPhotosThread  extends Thread  {
     private RajceHttp rajceHttp;
     private String result;
     private ArrayList<Photo> photos;
-    private int uploadCounter;
+
+    private static class StateUploads implements StateUpload {
+        private int counterUploaded;
+        private int count;
+        private RajceAPI rajceAPI;
+        private APIStateUpload stat;
+        private class UIThread implements Runnable {
+            private int newStat;
+            private APIStateUpload stat;
+            public UIThread(int newStat, APIStateUpload stat) {
+                this.newStat = newStat;
+                this.stat = stat;
+            }
+            public void run() {
+                stat.changeStat(newStat);
+            }
+        }
+        public StateUploads(int count, APIStateUpload stat, RajceAPI rajceAPI) {
+            counterUploaded = 0;
+            this.count = count;
+            this.stat = stat;
+            this.rajceAPI = rajceAPI;
+        }
+
+        public void incUploaded() {
+            counterUploaded++;
+        }
+
+        @Override
+        synchronized public void changeStat(int newStat) {
+            rajceAPI.mHandler.post(new UIThread((counterUploaded*100 + newStat) / count, stat ));
+        }
+    }
     
     public UploadPhotosThread(int albumID, RajceAPI rajceAPI, String token, APIStateUpload stat, ArrayList<Photo> photos) {
         super();
@@ -38,7 +70,6 @@ public class UploadPhotosThread  extends Thread  {
         this.rajceHttp = new RajceHttp(); 
         this.albumID = albumID;
         this.photos = photos;
-        uploadCounter = 0;
     }
     
     private String openAlbum(int albumID) {
@@ -118,35 +149,19 @@ public class UploadPhotosThread  extends Thread  {
     
     public int uploadPhotos() {
         Serializer serializer = new Persister();
+        StateUploads stateUploads = new StateUploads(photos.size(), this.stat, rajceAPI);
         try {
             for (int i = 0; i < photos.size(); i++) {
                 Bitmap image = BitmapFactory.decodeFile(photos.get(i).fullFileName);
                 StringWriter sw = new StringWriter();
                 serializer.write(new AddPhotoRequest(token, image.getWidth(), image.getHeight(), albumToken, photos.get(i).photoName, photos.get(i).fullFileName, photos.get(i).description), sw);
                 Bitmap thumb =  Bitmap.createScaledBitmap (image, 100, 100, true);
-                String result = rajceHttp.sendPhoto(sw.toString(), image, thumb, photos.get(i), new StateUpload() {
-                        private int newStat;
-                        @Override
-                        public void changeStat(int nStat) {
-                            this.newStat = nStat;
-                            rajceAPI.mHandler.post(new Runnable() {
-                                private int lastStat = -1;
-                                public void run()
-                                {
-                                    int statNow = (uploadCounter*100 + newStat) / photos.size();
-                                    if (lastStat != statNow) {
-                                        stat.changeStat(statNow);
-                                        lastStat = statNow;
-                                    }
-                                }
-                            });
-                        }
-                    });
+                String result = rajceHttp.sendPhoto(sw.toString(), image, thumb, photos.get(i), stateUploads);
                 AddPhotoResponse addPhotoResponse = serializer.read(AddPhotoResponse.class, new StringReader( result), false );
                 if (addPhotoResponse.errorCode == null) {
                     this.token = addPhotoResponse.sessionToken;
                     rajceAPI.setSessionToken(addPhotoResponse.sessionToken);
-                    uploadCounter++;
+                    stateUploads.incUploaded();
                 } else {
                     this.result = addPhotoResponse.result;
                     return 1;   
