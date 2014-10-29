@@ -69,7 +69,7 @@ public class RajceAPI {
     }
 
     /**
-     * Zkracena verze pro vytvoreni noveho alba.
+     * Zkracena verze metody pro vytvoreni noveho alba.
      * @param stat rozhrani pro zpetne volani informujici o vysledku operace
      * @param name nazev alba
      * @return
