@@ -58,6 +58,7 @@ public class RajceHttp {
             int chunkSize = 1024*512;
     
             while (bytesTransferred < totalSize) {
+                stat.changeStat((100 * bytesTransferred) / totalSize);
                 int nextChunkSize = totalSize - bytesTransferred;
                 if (nextChunkSize > chunkSize) {
                     nextChunkSize = chunkSize;
@@ -65,7 +66,6 @@ public class RajceHttp {
 
                 out.write(bytes, bytesTransferred, nextChunkSize);
                 bytesTransferred += nextChunkSize;
-                stat.changeStat((100 * bytesTransferred) / totalSize);
             }
         } else {
             out.write(bytes);
@@ -109,7 +109,8 @@ public class RajceHttp {
             result += line;
         }
 
-        reader.close(); 
+        reader.close();
+        stat.changeStat(100);
         return result;
     }
 
