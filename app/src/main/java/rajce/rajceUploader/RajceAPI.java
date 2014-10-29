@@ -59,7 +59,7 @@ public class RajceAPI {
     }
 
     /**
-     * Ziskani informaci o albech.
+     * Ziskani informaci o albech na rajce.net.
      * @param stat rozhrani pro zpetne volani informujici o vysledku operace (preda mu i informace o albech)
      * @return
      */
