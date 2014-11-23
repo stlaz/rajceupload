@@ -32,6 +32,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * ImageGallery.java
@@ -44,8 +46,18 @@ public class ImageGallery extends Activity {
     private Cursor cc = null;
     // pole pro ulozeni identifikatoru obrazku
     private static String[] mIDs = null;
+    // pole pro ulozeni identifikatoru vybranych obrazku
+    private List<Long> selIDs;
     // LRU cache pro ulozeni nedavno pouzitych obrazku
     private LruCache<String, Bitmap> mMemoryCache;
+
+    /**
+     * Metoda pro ziskani seznamu identifikatoru vybranych fotek.
+     * @return seznam identifikatoru vybranych fotek
+     */
+    public List<Long> getSelIDs() {
+        return selIDs;
+    }
 
     /**
      * V onCreate se nastavi retainer fragment, cache a thread na nahravani obrazku.
@@ -59,21 +71,28 @@ public class ImageGallery extends Activity {
 
         super.onCreate(savedInstanceState);
 
-        // vytvoreni/ziskani fragmentu pro ulozeni cache
+        // vytvoreni/ziskani fragmentu pro ulozeni cache a vybranych fotek
         RetainFragment retainFragment =
                 findOrCreateRetainFragment(getFragmentManager());
+
         mMemoryCache = retainFragment.mRetainedCache;
-        // pokud cache jeste neexistuje, tak ji vztvorime
+        // pokud cache jeste neexistuje, tak ji vytvorime
         if (mMemoryCache == null) {
             mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
                 @Override
                 protected int sizeOf(String key, Bitmap bitmap) {
-                    // The cache size will be measured in kilobytes rather than
-                    // number of items.
+                    // velikost v kB
                     return bitmap.getByteCount() / 1024;
                 }
             };
             retainFragment.mRetainedCache = mMemoryCache;
+        }
+
+        selIDs = retainFragment.selIDs;
+        // pokud seznam vybranych fotek jeste neexistuje, tak ho vytvorime
+        if (selIDs == null) {
+            selIDs = new ArrayList<Long>();
+            retainFragment.selIDs = selIDs;
         }
 
         setContentView(R.layout.activity_img_gallery);
@@ -118,7 +137,14 @@ public class ImageGallery extends Activity {
         // kliknuti na item na dane pozici
         gridview.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                Toast.makeText(ImageGallery.this, "" + position, Toast.LENGTH_SHORT).show();
+                if (selIDs.contains(id)) {
+                    selIDs.remove(id);
+                    Toast.makeText(ImageGallery.this, "Deselected: " + id, Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    selIDs.add(id);
+                    Toast.makeText(ImageGallery.this, "Selected: " + id, Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -198,7 +224,7 @@ public class ImageGallery extends Activity {
         }
 
         public long getItemId(int position) {
-            return position;
+            return Long.parseLong(mIDs[position]);
         }
 
         /**
@@ -235,6 +261,7 @@ public class ImageGallery extends Activity {
                 imageView.setImageBitmap(bitmap);
             } else {
                 if (cancelPotentialWork(bmpId, imageView)) {
+                    // TODO: Sem prijde novy placeholder az bude k dispozici
                     Bitmap mPlaceHolder = BitmapFactory.decodeResource(getResources(), R.drawable.sample_0);
                     final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
                     final AsyncDrawable asyncDrawable =
@@ -373,6 +400,7 @@ public class ImageGallery extends Activity {
      */
     public class RetainFragment extends Fragment {
         public LruCache<String, Bitmap> mRetainedCache;
+        public List<Long> selIDs;
         public RetainFragment() {}
 
         @Override
