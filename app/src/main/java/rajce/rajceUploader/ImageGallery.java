@@ -8,12 +8,17 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.LruCache;
+import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.content.Context;
 import android.view.View;
@@ -23,14 +28,14 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import java.lang.ref.WeakReference;
 
 /**
  * ImageGallery.java
  * Purpose: Image gallery activity.
- *
- * @author Petr Kubat, xkubat11@stud.fit.vutbr.cz
  */
 
 public class ImageGallery extends Activity {
@@ -72,6 +77,11 @@ public class ImageGallery extends Activity {
         }
 
         setContentView(R.layout.activity_img_gallery);
+        // Nastavení textu, odstranění ikony
+        setTitle("FOTO");
+        getActionBar().setIcon(new ColorDrawable(getResources().getColor(android.R.color.transparent)));
+
+        centerTitleText();
 
         // TODO: Tohle pak asi strcit do nejake jine activity
         // Vytahneme z MediaStore vsechny fotky na SD karte
@@ -114,6 +124,13 @@ public class ImageGallery extends Activity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.img_gallery, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -123,6 +140,23 @@ public class ImageGallery extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void centerTitleText() {
+        int titleId = 0;    // id titulku na action baru
+        titleId = getResources().getIdentifier("action_bar_title", "id", "android");
+
+        if(titleId > 0) {
+            TextView titleTextView = (TextView) findViewById(titleId);
+            DisplayMetrics metrics = getResources().getDisplayMetrics();
+            // Fetch layout parameters of titleTextView (LinearLayout.LayoutParams : Info from HierarchyViewer)
+            LinearLayout.LayoutParams txvPars = (LinearLayout.LayoutParams) titleTextView.getLayoutParams();
+            txvPars.gravity = Gravity.CENTER_HORIZONTAL;
+            txvPars.width = metrics.widthPixels;
+            titleTextView.setLayoutParams(txvPars);
+
+            titleTextView.setGravity(Gravity.CENTER);
+        }
     }
 
     /**

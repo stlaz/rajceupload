@@ -1,9 +1,11 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="android:Theme.Holo">
-        <item name="android:windowNoTitle">true</item>
+    <style name="AppTheme" parent="android:Theme.Holo.Light">
+        <item name="android:windowNoTitle">false</item>
         <!-- Customize your theme here. -->
+    </style>
+    <style name="AppDark" parent="android:Theme.Holo">
     </style>
 
 </resources>
