@@ -255,6 +255,12 @@ public class ImageGallery extends Activity {
                 imageView = (ImageView) convertView;
             }
             loadBitmap(Long.parseLong(mIDs[position]), imageView);
+            if (selIDs.contains(Long.parseLong(mIDs[position]))) {
+                imageView.setBackgroundColor(Color.parseColor("#CC3300"));
+            }
+            else {
+                imageView.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+            }
             return imageView;
         }
 
