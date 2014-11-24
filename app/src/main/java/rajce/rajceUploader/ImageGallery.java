@@ -246,6 +246,7 @@ public class ImageGallery extends Activity {
                 int width = (int) (metrics.widthPixels / 3.4);
 
                 imageView = new ImageView(mContext);
+
                 imageView.setLayoutParams(new GridView.LayoutParams(width, width));
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 imageView.setCropToPadding(true);
