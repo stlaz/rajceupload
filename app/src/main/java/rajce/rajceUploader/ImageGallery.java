@@ -7,6 +7,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -96,7 +97,7 @@ public class ImageGallery extends Activity {
         }
 
         setContentView(R.layout.activity_img_gallery);
-        // Nastavení textu, odstranění ikony
+        // Nastavení textu titulku, odstranění ikony
         setTitle("FOTO");
         getActionBar().setIcon(new ColorDrawable(getResources().getColor(android.R.color.transparent)));
 
@@ -137,12 +138,16 @@ public class ImageGallery extends Activity {
         // kliknuti na item na dane pozici
         gridview.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                ImageView image = (ImageView) v;
+
                 if (selIDs.contains(id)) {
                     selIDs.remove(id);
+                    image.setBackgroundColor(getResources().getColor(android.R.color.transparent));
                     Toast.makeText(ImageGallery.this, "Deselected: " + id, Toast.LENGTH_SHORT).show();
                 }
                 else {
                     selIDs.add(id);
+                    image.setBackgroundColor(Color.parseColor("#CC3300"));
                     Toast.makeText(ImageGallery.this, "Selected: " + id, Toast.LENGTH_SHORT).show();
                 }
             }
@@ -237,10 +242,14 @@ public class ImageGallery extends Activity {
             ImageView imageView;
             // neni recyklovany, vytvorime novy
             if (convertView == null) {
+                DisplayMetrics metrics = getResources().getDisplayMetrics();
+                int width = (int) (metrics.widthPixels / 3.4);
+
                 imageView = new ImageView(mContext);
-                imageView.setLayoutParams(new GridView.LayoutParams(-1, -1));
+                imageView.setLayoutParams(new GridView.LayoutParams(width, width));
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                imageView.setPadding(1, 1, 1, 1);
+                imageView.setCropToPadding(true);
+                imageView.setPadding(7, 7, 7, 7);
             } else {
                 imageView = (ImageView) convertView;
             }
