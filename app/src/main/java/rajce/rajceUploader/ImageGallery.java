@@ -51,7 +51,8 @@ public class ImageGallery extends Activity {
     private List<Long> selIDs;
     // LRU cache pro ulozeni nedavno pouzitych obrazku
     private LruCache<String, Bitmap> mMemoryCache;
-
+    private int viewBorder;
+    private int viewWidth;
     /**
      * Metoda pro ziskani seznamu identifikatoru vybranych fotek.
      * @return seznam identifikatoru vybranych fotek
@@ -65,6 +66,12 @@ public class ImageGallery extends Activity {
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        final float scale = getResources().getDisplayMetrics().density;
+        viewBorder = (int)(3*scale + 0.5f);
+
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        viewWidth = (int) (metrics.widthPixels / 3.05);
+
         final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
         String[] mProjection = { MediaStore.MediaColumns._ID };
         // 1/16 maxima pouzitelne pameti, magic number
@@ -242,15 +249,12 @@ public class ImageGallery extends Activity {
             ImageView imageView;
             // neni recyklovany, vytvorime novy
             if (convertView == null) {
-                DisplayMetrics metrics = getResources().getDisplayMetrics();
-                int width = (int) (metrics.widthPixels / 3.1);
-
                 imageView = new ImageView(mContext);
 
-                imageView.setLayoutParams(new GridView.LayoutParams(width, width));
+                imageView.setLayoutParams(new GridView.LayoutParams(viewWidth, viewWidth));
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 imageView.setCropToPadding(true);
-                imageView.setPadding(5, 5, 5, 5);
+                imageView.setPadding(viewBorder, viewBorder, viewBorder, viewBorder);
             } else {
                 imageView = (ImageView) convertView;
             }
