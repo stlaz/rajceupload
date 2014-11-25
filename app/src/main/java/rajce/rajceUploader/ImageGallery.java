@@ -282,7 +282,7 @@ public class ImageGallery extends Activity {
             } else {
                 if (cancelPotentialWork(bmpId, imageView)) {
                     // TODO: Sem prijde novy placeholder az bude k dispozici
-                    Bitmap mPlaceHolder = BitmapFactory.decodeResource(getResources(), android.R.color.darker_gray);
+                    Bitmap mPlaceHolder = BitmapFactory.decodeResource(getResources(), R.drawable.graypix);
                     final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
                     final AsyncDrawable asyncDrawable =
                             new AsyncDrawable(getResources(), mPlaceHolder, task);
@@ -418,7 +418,7 @@ public class ImageGallery extends Activity {
     /**
      * Fragment pro ulozeni dat, ktere by mely prezit otoceni telefonu
      */
-    public class RetainFragment extends Fragment {
+    public static class RetainFragment extends Fragment {
         public LruCache<String, Bitmap> mRetainedCache;
         public List<Long> selIDs;
         public RetainFragment() {}
