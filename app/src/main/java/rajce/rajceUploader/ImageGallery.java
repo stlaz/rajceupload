@@ -243,14 +243,14 @@ public class ImageGallery extends Activity {
             // neni recyklovany, vytvorime novy
             if (convertView == null) {
                 DisplayMetrics metrics = getResources().getDisplayMetrics();
-                int width = (int) (metrics.widthPixels / 3.4);
+                int width = (int) (metrics.widthPixels / 3.1);
 
                 imageView = new ImageView(mContext);
 
                 imageView.setLayoutParams(new GridView.LayoutParams(width, width));
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 imageView.setCropToPadding(true);
-                imageView.setPadding(7, 7, 7, 7);
+                imageView.setPadding(5, 5, 5, 5);
             } else {
                 imageView = (ImageView) convertView;
             }
