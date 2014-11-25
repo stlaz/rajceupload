@@ -105,7 +105,7 @@ public class ImageGallery extends Activity {
 
         setContentView(R.layout.activity_img_gallery);
         // Nastavení textu titulku, odstranění ikony
-        setTitle("FOTO");
+        setTitle("FOTO ▼");
         getActionBar().setIcon(new ColorDrawable(getResources().getColor(android.R.color.transparent)));
 
         centerTitleText();
@@ -282,7 +282,7 @@ public class ImageGallery extends Activity {
             } else {
                 if (cancelPotentialWork(bmpId, imageView)) {
                     // TODO: Sem prijde novy placeholder az bude k dispozici
-                    Bitmap mPlaceHolder = BitmapFactory.decodeResource(getResources(), R.drawable.sample_0);
+                    Bitmap mPlaceHolder = BitmapFactory.decodeResource(getResources(), android.R.color.darker_gray);
                     final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
                     final AsyncDrawable asyncDrawable =
                             new AsyncDrawable(getResources(), mPlaceHolder, task);
