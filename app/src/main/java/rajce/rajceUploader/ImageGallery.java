@@ -49,8 +49,15 @@ public class ImageGallery extends Activity {
         this.recentFlg = recentFlg;
     }
 
-    // kurzor pro pruchod polem obrazku
+    // flag pro zpracovani nedavnych fotek
     private boolean recentFlg = false;
+
+    public void setLayout(int layout) {
+        this.layout = layout;
+    }
+
+    // layout pro aktivitu
+    private int layout = -1;
     // kurzor pro pruchod polem obrazku
     private Cursor cc = null;
     // pole pro ulozeni identifikatoru obrazku
@@ -112,8 +119,10 @@ public class ImageGallery extends Activity {
             selIDs = new ArrayList<Long>();
             retainFragment.selIDs = selIDs;
         }
-
-        setContentView(R.layout.activity_img_gallery);
+        if (layout == -1)
+            setContentView(R.layout.activity_img_gallery);
+        else
+            setContentView(layout);
         // Nastavení textu titulku, odstranění ikony
         setTitle("FOTO ▼");
         getActionBar().setIcon(new ColorDrawable(getResources().getColor(android.R.color.transparent)));
@@ -127,15 +136,18 @@ public class ImageGallery extends Activity {
                 MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC");
         if (recentFlg) {
             cc.moveToFirst();
+            // datum nejnovejsi fotky
             String recentDate = cc.getString(1);
             Log.e("Date:", recentDate);
             Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis(Long.parseLong(recentDate));
+            // prehodime na pulnoc toho sameho dne
             cal.set(Calendar.HOUR_OF_DAY, 0);
             cal.set(Calendar.MINUTE, 0);
             cal.set(Calendar.SECOND, 0);
             recentDate = String.valueOf(cal.getTimeInMillis());
             Log.e("Date2:", recentDate);
+            // vybereme vse, co se nafotilo ten samy den
             cc = this.getContentResolver().query(
                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI, mProjection,
 
