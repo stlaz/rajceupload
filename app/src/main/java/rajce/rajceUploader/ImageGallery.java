@@ -34,6 +34,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -43,6 +45,12 @@ import java.util.List;
 
 public class ImageGallery extends Activity {
 
+    public void setRecentFlg(boolean recentFlg) {
+        this.recentFlg = recentFlg;
+    }
+
+    // kurzor pro pruchod polem obrazku
+    private boolean recentFlg = false;
     // kurzor pro pruchod polem obrazku
     private Cursor cc = null;
     // pole pro ulozeni identifikatoru obrazku
@@ -73,7 +81,9 @@ public class ImageGallery extends Activity {
         viewWidth = (int) (metrics.widthPixels / 3.05);
 
         final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
-        String[] mProjection = { MediaStore.MediaColumns._ID };
+        // Sloupce pro vyber fotek
+        String[] mProjection = { MediaStore.MediaColumns._ID,
+                                 MediaStore.Images.ImageColumns.DATE_TAKEN };
         // 1/16 maxima pouzitelne pameti, magic number
         final int cacheSize = maxMemory / 16;
 
@@ -114,7 +124,26 @@ public class ImageGallery extends Activity {
         // Vytahneme z MediaStore vsechny fotky na SD karte
         cc = this.getContentResolver().query(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI, mProjection, null, null,
-                MediaStore.MediaColumns._ID + " DESC");
+                MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC");
+        if (recentFlg) {
+            cc.moveToFirst();
+            String recentDate = cc.getString(1);
+            Log.e("Date:", recentDate);
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeInMillis(Long.parseLong(recentDate));
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            recentDate = String.valueOf(cal.getTimeInMillis());
+            Log.e("Date2:", recentDate);
+            cc = this.getContentResolver().query(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI, mProjection,
+
+                    MediaStore.Images.ImageColumns.DATE_TAKEN + " > '" + recentDate + "'", null,
+                    MediaStore.MediaColumns._ID + " DESC");
+
+        }
+
         // Thread pro ziskani ID z db fotek do vlastniho pole
         Thread t = new Thread() {
             public void run() {
@@ -125,6 +154,8 @@ public class ImageGallery extends Activity {
                     for (int i = 0; i < cc.getCount(); i++) {
                         cc.moveToPosition(i);
                         mIDs[i] = cc.getString(0);
+                        if (recentFlg)
+                            selIDs.add(Long.parseLong(mIDs[i]));
                     }
 
                 } catch (Exception e) {
@@ -140,6 +171,7 @@ public class ImageGallery extends Activity {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        cc.close();
         gridview.setAdapter(new ImageAdapter(this));
 
         // kliknuti na item na dane pozici
