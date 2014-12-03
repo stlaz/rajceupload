@@ -34,6 +34,15 @@
             android:label="@string/title_activity_recent_gallery"
             android:theme="@style/AppDark" >
         </activity>
+        <activity
+            android:name="rajce.rajceUploader.OldNewDialog"
+            android:label="@string/title_activity_old_new_dialog"
+            android:parentActivityName="rajce.rajceUploader.ImageGallery">
+            <!-- Podpora rodicovske aktivity pro Android 4.0 a nižší -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="rajce.rajceUploader.ImageGallery" />
+        </activity>
     </application>
 
 </manifest>
