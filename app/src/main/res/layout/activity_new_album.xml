@@ -1,0 +1,71 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context="rajce.rajceUploader.NewAlbum">
+
+    <ScrollView android:id="@+id/new_album" android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout android:id="@+id/new_album_form" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:orientation="vertical">
+
+            <EditText android:id="@+id/new_name" android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/album_name"
+                android:maxLines="1"
+                android:singleLine="true" />
+
+            <EditText android:id="@+id/descript" android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_descript"
+                />
+
+            <Switch
+                android:id="@+id/switch1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/is_hidden"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:textOff="NE"
+                android:textOn="ANO"/>
+
+            <Switch
+                android:id="@+id/switch2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/pass_protected"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:textOff="NE"
+                android:textOn="ANO" />
+
+            <EditText android:id="@+id/pass_name" android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/album_name"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:visibility="invisible"/>
+
+            <EditText android:id="@+id/pass_pass" android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/album_name"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:visibility="invisible"/>
+
+            <Button android:id="@+id/new_album_submit" style="?android:textAppearanceSmall"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/action_submit"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</RelativeLayout>

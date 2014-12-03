@@ -7,7 +7,7 @@
     tools:context="rajce.rajceUploader.OldNewDialog">
 
     <ListView
-        android:id="@android:id/list"
+        android:id="@+id/oldnew_list"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:divider="#6DB844"

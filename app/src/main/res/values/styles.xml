@@ -3,9 +3,15 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="android:Theme.Holo.Light">
         <item name="android:windowNoTitle">false</item>
-        <!-- Customize your theme here. -->
+        <item name="android:actionBarStyle">@style/RajceActionBar</item>
     </style>
+
+    <!-- Styl pro galerii-->
     <style name="AppDark" parent="android:Theme.Holo">
+    </style>
+
+    <style name="RajceActionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
+        <item name="android:background">#6DB844</item>
     </style>
 
 </resources>
