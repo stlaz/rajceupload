@@ -124,10 +124,10 @@ public class ImageGallery extends Activity {
         else
             setContentView(layout);
         // Nastavení textu titulku, odstranění ikony
-        setTitle("FOTO ▼");
+        setTitle("FOTOGRAFIE ▼");
         getActionBar().setIcon(new ColorDrawable(getResources().getColor(android.R.color.transparent)));
 
-        centerTitleText();
+        //centerTitleText();
 
         // TODO: Tohle pak asi strcit do nejake jine activity
         // Vytahneme z MediaStore vsechny fotky na SD karte

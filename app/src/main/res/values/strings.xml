@@ -2,9 +2,10 @@
 <resources>
 
     <string name="app_name">Rajče Uploader</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_img_gallery">ImgGalleryActivity</string>
     <string name="title_activity_recent_gallery">RecentGallery</string>
+    <string name="action_next">Dále</string>
+    <string name="action_down">Výběr</string>
 
 </resources>
