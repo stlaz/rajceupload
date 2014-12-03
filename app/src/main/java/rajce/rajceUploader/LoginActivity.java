@@ -87,7 +87,9 @@ public class LoginActivity extends Activity {
                     }
                 }, mHandler);
                 // TODO: Prechod na gallery
-                if (api.isLogin()) finish();
+                if (api.isLogin()) {
+                    startGallery();
+                };
             }
         }
 
@@ -188,6 +190,7 @@ public class LoginActivity extends Activity {
     public void startGallery() {
         Intent intent = new Intent(this, ImageGallery.class);
         startActivity(intent);
+        finish();
     }
 
     /**
