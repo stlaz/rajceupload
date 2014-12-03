@@ -7,5 +7,11 @@
     <string name="title_activity_recent_gallery">RecentGallery</string>
     <string name="action_next">Dále</string>
     <string name="action_down">Výběr</string>
-
+    <string name="title_activity_old_new_dialog">Nahrávání</string>
+    <string name="hello_world">Hello world!</string>
+    <string-array name="oldnew">
+        <item>Vytvořit nové album</item>
+        <item>Přidat do stávajícího</item>
+    </string-array>
+    
 </resources>
