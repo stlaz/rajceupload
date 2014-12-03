@@ -30,6 +30,7 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.lang.ref.WeakReference;
@@ -134,43 +135,71 @@ public class ImageGallery extends Activity {
         cc = this.getContentResolver().query(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI, mProjection, null, null,
                 MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC");
+
+        // pokud se hledaji pouze nedavne fotky
         if (recentFlg) {
-            cc.moveToFirst();
-            // datum nejnovejsi fotky
-            String recentDate = cc.getString(1);
-            Log.e("Date:", recentDate);
-            Calendar cal = Calendar.getInstance();
-            cal.setTimeInMillis(Long.parseLong(recentDate));
-            // prehodime na pulnoc toho sameho dne
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            recentDate = String.valueOf(cal.getTimeInMillis());
-            Log.e("Date2:", recentDate);
-            // vybereme vse, co se nafotilo ten samy den
-            cc = this.getContentResolver().query(
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI, mProjection,
+            // zda se aspon neco naslo
+            if ( cc != null && cc.moveToFirst() ) {
+                // datum nejnovejsi fotky
+                String recentDate = cc.getString(1);
+                Log.e("Date:", recentDate);
+                Calendar cal = Calendar.getInstance();
+                cal.setTimeInMillis(Long.parseLong(recentDate));
+                // prehodime na pulnoc toho sameho dne
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                recentDate = String.valueOf(cal.getTimeInMillis());
+                Log.e("Date2:", recentDate);
+                // vybereme vse, co se nafotilo ten samy den
+                cc = this.getContentResolver().query(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, mProjection,
 
-                    MediaStore.Images.ImageColumns.DATE_TAKEN + " > '" + recentDate + "'", null,
-                    MediaStore.MediaColumns._ID + " DESC");
+                        MediaStore.Images.ImageColumns.DATE_TAKEN + " > '" + recentDate + "'", null,
+                        MediaStore.MediaColumns._ID + " DESC");
+            }
+        }
 
+        // kdyz se nenejadou vubec zadne fotky - vypise se hlaska
+        if ( cc != null ) {
+
+            // nove textview uprostred stranky
+            TextView tv1 = new TextView(this);
+            tv1.setText(R.string.no_photos_found);
+            tv1.setTextSize(20);
+            tv1.setGravity(Gravity.CENTER);
+
+            LinearLayout ll = new LinearLayout(this);
+            ll.setOrientation(LinearLayout.VERTICAL);
+            ll.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT));
+            ll.setGravity(Gravity.CENTER);
+            ll.addView(tv1);
+            setContentView(ll);
+            return;
         }
 
         // Thread pro ziskani ID z db fotek do vlastniho pole
         Thread t = new Thread() {
             public void run() {
                 try {
-                    cc.moveToFirst();
-                    mIDs = new String[cc.getCount()];
-                    // projedeme vsechny obrazky a vytahneme z nich ID
-                    for (int i = 0; i < cc.getCount(); i++) {
-                        cc.moveToPosition(i);
-                        mIDs[i] = cc.getString(0);
-                        if (recentFlg)
-                            selIDs.add(Long.parseLong(mIDs[i]));
+                    if ( cc != null && cc.moveToFirst() ) {
+                        mIDs = new String[cc.getCount()];
+                        // projedeme vsechny obrazky a vytahneme z nich ID
+                        for (int i = 0; i < cc.getCount(); i++) {
+                            cc.moveToPosition(i);
+                            mIDs[i] = cc.getString(0);
+                            if (recentFlg)
+                                selIDs.add(Long.parseLong(mIDs[i]));
+                        }
+                    }
+                    else {
+                        // sem by se to teoreticky nemelo nikdy dostat
+                        Log.e("NO_PHOTO","No recent photos found");
+                        return;
                     }
 
                 } catch (Exception e) {
+                    return;
                     }
             }
         };
