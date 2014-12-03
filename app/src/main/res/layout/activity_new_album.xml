@@ -10,7 +10,8 @@
         android:layout_height="match_parent">
 
         <LinearLayout android:id="@+id/new_album_form" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:orientation="vertical">
+            android:layout_height="wrap_content" android:orientation="vertical"
+            android:animateLayoutChanges="true">
 
             <EditText android:id="@+id/new_name" android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -47,17 +48,17 @@
 
             <EditText android:id="@+id/pass_name" android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/album_name"
+                android:hint="@string/album_login"
                 android:maxLines="1"
                 android:singleLine="true"
-                android:visibility="invisible"/>
+                android:visibility="gone"/>
 
             <EditText android:id="@+id/pass_pass" android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/album_name"
+                android:hint="@string/album_pass"
                 android:maxLines="1"
                 android:singleLine="true"
-                android:visibility="invisible"/>
+                android:visibility="gone"/>
 
             <Button android:id="@+id/new_album_submit" style="?android:textAppearanceSmall"
                 android:layout_width="match_parent" android:layout_height="wrap_content"

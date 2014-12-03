@@ -5,10 +5,15 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.widget.Switch;
 
 
 public class NewAlbum extends Activity {
-
+    private Switch hiddenSwitch;
+    private Switch passSwitch;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -16,6 +21,33 @@ public class NewAlbum extends Activity {
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setIcon(new ColorDrawable(getResources().getColor(android.R.color.transparent)));
+
+        hiddenSwitch = (Switch) findViewById(R.id.switch1);
+        passSwitch = (Switch) findViewById(R.id.switch2);
+
+        final EditText passLogin = (EditText) findViewById(R.id.pass_name);
+        final EditText passPass = (EditText) findViewById(R.id.pass_pass);
+
+        hiddenSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(b);
+                else;
+            }
+        });
+        passSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(b) {
+                    passLogin.setVisibility(View.VISIBLE);
+                    passPass.setVisibility(View.VISIBLE);
+                }
+                else {
+                    passLogin.setVisibility(View.GONE);
+                    passPass.setVisibility(View.GONE);
+                }
+            }
+        });
     }
 
 

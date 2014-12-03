@@ -16,6 +16,8 @@
     <string name="action_submit">Nahrát</string>
     <string name="is_hidden">Skrýt album</string>
     <string name="pass_protected">Album s heslem</string>
+    <string name="album_login">Jméno</string>
+    <string name="album_pass">Heslo</string>
 
     <string-array name="oldnew">
         <item>Vytvořit nové album</item>
