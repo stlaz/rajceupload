@@ -1,5 +1,7 @@
 package rajce.rajceUploader.network.thread;
 
+import android.util.Log;
+
 import java.io.StringReader;
 import java.io.StringWriter;
 import org.simpleframework.xml.Serializer;
@@ -39,20 +41,22 @@ public class SiginThread extends Thread {
             LoginResponse loginResponse = serializer.read(LoginResponse.class, new StringReader( result ), false);
             if (loginResponse.errorCode == null) {
                 rajceAPI.setSessionToken(loginResponse.sessionToken);
-                rajceAPI.mHandler.post(new Runnable() {
+                stat.finish();
+                /*rajceAPI.mHandler.post(new Runnable() {
                     public void run()
                     {
                         stat.finish();
                     }
-                });
+                });*/
             } else {
                 errorText = loginResponse.result;
-                rajceAPI.mHandler.post(new Runnable() {
+                stat.error(errorText);
+                /*rajceAPI.mHandler.post(new Runnable() {
                     public void run()
                     {
                         stat.error(errorText);
                     }
-                });
+                });*/
             }
         } catch (Exception e) {
             errorText = e.toString();

@@ -56,6 +56,11 @@ public class RajceAPI {
     public void sigin(String email, String pass, APIState stat) {
         SiginThread siginThread = new SiginThread(this, stat, email, MD5(pass));
         siginThread.start();
+        try {
+            siginThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -140,11 +145,11 @@ public class RajceAPI {
 
                 public void finish() {
                     debug.append("\nTest login: OK.");
-                    testAPI1();
+                    //testAPI1();
                 }
             });
         } else {
-            testAPI1();
+            //testAPI1();
         }
     }
     

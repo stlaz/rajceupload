@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 
@@ -40,6 +41,10 @@ public class LoginActivity extends Activity {
     private static final String[] DUMMY_CREDENTIALS = new String[]{
             "foo@example.com:hello", "bar@example.com:world"
     };
+
+    // Application shared preference file name
+    public static final String PREFS_NAME = "RajcePrefs";
+
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -56,6 +61,32 @@ public class LoginActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        // pripravime shared preferences pro nacteni/ulozeni hesla
+        // TODO: Crypto
+        final SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        final String pEmail = settings.getString("pEmail", null);
+        final String pPasswd = settings.getString("pPasswd", null);
+
+        /*if (pEmail != null && pPasswd != null) {
+            RajceAPI api = new RajceAPI();
+            if (!api.isLogin()) {
+                Log.e("pEmail", pEmail);
+                Log.e("pPasswd", pPasswd);
+                // oboje ulozene, muzeme se autentizovat podle nich
+                api.sigin(pEmail, pPasswd, new APIState() {
+                    public void error(String error) {
+                        Log.e("LoginTAG", error);
+                    }
+
+                    public void finish() {
+                        Log.e("LoginTAG", "Test login: OK.");
+                    }
+                });
+                // TODO: Prechod na gallery
+                if (api.isLogin()) finish();
+            }
+        }*/
+
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
 
@@ -71,6 +102,9 @@ public class LoginActivity extends Activity {
             }
         });
 
+        // TODO: To tu nenechavat :)
+        mEmailView.setText("tkunovsky@seznam.cz");
+        mPasswordView.setText("vutfit");
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -96,6 +130,7 @@ public class LoginActivity extends Activity {
         // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
+
 
         // Store values at the time of the login attempt.
         String email = mEmailView.getText().toString();
@@ -194,6 +229,8 @@ public class LoginActivity extends Activity {
         UserLoginTask(String email, String password) {
             mEmail = email;
             mPassword = password;
+            Log.e("mEmail", mEmail);
+            Log.e("mPassword", mPassword);
         }
 
         @Override
@@ -218,24 +255,30 @@ public class LoginActivity extends Activity {
                 }
             }
             */
+            // pripravime shared preferences pro nacteni/ulozeni hesla
+            // TODO: Crypto
+            final SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
 
-            /*
             Looper.prepare();
             RajceAPI api = new RajceAPI();
             if (!api.isLogin()) {
-                api.sigin(mEmail, mPassword, new APIState() {
-                    public void error(String error) {
-                        Log.w("LoginTAG", error);
-                    }
+                    api.sigin(mEmail, mPassword, new APIState() {
+                        public void error(String error) {
+                            Log.e("LoginTAG", error);
+                        }
 
-                    public void finish() {
-                        Log.w("LoginTAG", "Test login: OK.");
-                    }
-                });
-
+                        public void finish() {
+                            Log.e("LoginTAG", "Test login: OK.");
+                            SharedPreferences.Editor editor = settings.edit();
+                            editor.putString("pEmail", mEmail);
+                            editor.putString("pPasswd", mPassword);
+                            editor.commit();
+                            Log.e("LoginTAG", "Preferences updated.");
+                        }
+                    });
                 if (!api.isLogin()) return false;
             }
-            */
+
 
             // TODO: register the new account here.
             return true;
