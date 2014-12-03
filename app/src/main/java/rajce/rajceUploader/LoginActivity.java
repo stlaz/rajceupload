@@ -100,7 +100,6 @@ public class LoginActivity extends Activity {
                         Log.e("LoginTAG", "Test login: OK.");
                     }
                 }, mHandler);
-                // TODO: Prechod na gallery
                 if (api.isLogin()) {
                     startGallery();
                 };
@@ -209,7 +208,7 @@ public class LoginActivity extends Activity {
 
     private static byte[] getRawKey(byte[] seed) throws Exception {
         KeyGenerator kgen = KeyGenerator.getInstance("AES");
-        SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
+        SecureRandom sr = SecureRandom.getInstance("SHA1PRNG", "Crypto");
         sr.setSeed(seed);
         kgen.init(128, sr); // 192 and 256 bits may not be available
         SecretKey skey = kgen.generateKey();
