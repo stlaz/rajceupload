@@ -1,8 +1,10 @@
 package rajce.rajceUploader;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -14,10 +16,12 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.app.FragmentActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.LruCache;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -26,11 +30,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.lang.ref.WeakReference;
@@ -44,7 +50,10 @@ import java.util.List;
  * Purpose: Image gallery activity.
  */
 
-public class ImageGallery extends Activity {
+public class ImageGallery extends FragmentActivity implements
+        ActionBar.OnNavigationListener {
+
+    private static final String STATE_SELECTED_NAVIGATION_ITEM = "selected_navigation_item";
 
     public void setRecentFlg(boolean recentFlg) {
         this.recentFlg = recentFlg;
@@ -69,6 +78,9 @@ public class ImageGallery extends Activity {
     private LruCache<String, Bitmap> mMemoryCache;
     private int viewBorder;
     private int viewWidth;
+
+    private SpinnerAdapter mSpinnerAdapter;
+
     /**
      * Metoda pro ziskani seznamu identifikatoru vybranych fotek.
      * @return seznam identifikatoru vybranych fotek
@@ -97,6 +109,7 @@ public class ImageGallery extends Activity {
 
         super.onCreate(savedInstanceState);
 
+
         // vytvoreni/ziskani fragmentu pro ulozeni cache a vybranych fotek
         RetainFragment retainFragment =
                 findOrCreateRetainFragment(getFragmentManager());
@@ -124,9 +137,31 @@ public class ImageGallery extends Activity {
             setContentView(R.layout.activity_img_gallery);
         else
             setContentView(layout);
+
         // Nastavení textu titulku, odstranění ikony
-        setTitle("FOTOGRAFIE ▼");
+        //setTitle("FOTOGRAFIE ▼");
         getActionBar().setIcon(new ColorDrawable(getResources().getColor(android.R.color.transparent)));
+        getActionBar().setDisplayShowTitleEnabled(false);
+
+        // ====================================
+
+        final ActionBar actionBar = getActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+
+
+        final String[] dropdownValues = getResources().getStringArray(R.array.action_list_co_vybirame);
+
+        // Specify a SpinnerAdapter to populate the dropdown list.
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(actionBar.getThemedContext(),
+                android.R.layout.simple_spinner_item, android.R.id.text1,
+                dropdownValues);
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // Set up the dropdown list navigation in the action bar.
+        actionBar.setListNavigationCallbacks(adapter, this);
+
+        // ====================================
 
         //centerTitleText();
 
@@ -503,4 +538,58 @@ public class ImageGallery extends Activity {
             setRetainInstance(true);
         }
     }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        // Restore the previously serialized current dropdown position.
+        if (savedInstanceState.containsKey(STATE_SELECTED_NAVIGATION_ITEM)) {
+            getActionBar().setSelectedNavigationItem(savedInstanceState.getInt(STATE_SELECTED_NAVIGATION_ITEM));
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        // Serialize the current dropdown position.
+        outState.putInt(STATE_SELECTED_NAVIGATION_ITEM, getActionBar()
+                .getSelectedNavigationIndex());
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(int position, long id) {
+        // When the given dropdown item is selected, show its contents in the
+        // container view.
+        /*
+        Fragment fragment = new DummySectionFragment();
+        Bundle args = new Bundle();
+        args.putInt(DummySectionFragment.ARG_SECTION_NUMBER, position + 1);
+        fragment.setArguments(args);
+        getFragmentManager().beginTransaction()
+                .replace(R.id.container, fragment).commit();
+
+          */
+
+        Toast.makeText(ImageGallery.this,"AAA",Toast.LENGTH_SHORT).show();
+        return true;
+    }
+
+
+    /** * A dummy fragment */
+
+    public static class DummySectionFragment extends Fragment {
+
+        public static final String ARG_SECTION_NUMBER = "placeholder_text";
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            TextView textView = new TextView(getActivity());
+            textView.setGravity(Gravity.CENTER);
+            textView.setText(Integer.toString(getArguments().getInt(ARG_SECTION_NUMBER)));
+            return textView;
+        }
+    }
+
+
 }
+
+
