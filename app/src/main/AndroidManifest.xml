@@ -19,20 +19,29 @@
             android:name="rajce.rajceUploader.ImageGallery"
             android:label="@string/app_name"
             android:theme="@style/AppDark" >
+        </activity>
+        <activity
+            android:name="rajce.rajceUploader.LoginActivity"
+            android:label="@string/title_activity_login"
+            android:windowSoftInputMode="adjustResize|stateVisible" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name="rajce.rajceUploader.LoginActivity"
-            android:label="@string/title_activity_login"
-            android:windowSoftInputMode="adjustResize|stateVisible" >
-        </activity>
-        <activity
             android:name="rajce.rajceUploader.RecentGallery"
             android:label="@string/title_activity_recent_gallery"
             android:theme="@style/AppDark" >
+        </activity>
+        <activity
+            android:name="rajce.rajceUploader.OldNewDialog"
+            android:label="@string/title_activity_old_new_dialog"
+            android:parentActivityName="rajce.rajceUploader.ImageGallery">
+            <!-- Podpora rodicovske aktivity pro Android 4.0 a nižší -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="rajce.rajceUploader.ImageGallery" />
         </activity>
     </application>
 

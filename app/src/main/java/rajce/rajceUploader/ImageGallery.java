@@ -2,6 +2,7 @@ package rajce.rajceUploader;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Intent;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -196,7 +197,7 @@ public class ImageGallery extends FragmentActivity implements
         }
 
         // kdyz se nenejadou vubec zadne fotky - vypise se hlaska
-        if ( cc != null ) {
+        if ( cc == null ) {
 
             // nove textview uprostred stranky
             TextView tv1 = new TextView(this);
@@ -282,8 +283,10 @@ public class ImageGallery extends FragmentActivity implements
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
+        switch(id) {
+            case R.id.action_next:
+                openNext();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -521,6 +524,14 @@ public class ImageGallery extends FragmentActivity implements
             //fm.executePendingTransactions();
         }
         return fragment;
+    }
+
+    /**
+     * Otevre dalsi obrazovku (OldNewDialog)
+     */
+    private void openNext() {
+        Intent i = new Intent(getApplicationContext(), OldNewDialog.class);
+        startActivity(i);
     }
 
     /**
