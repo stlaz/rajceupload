@@ -13,7 +13,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -24,8 +26,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 import rajce.rajceUploader.RajceAPI;
 import rajce.rajceUploader.network.info.APIState;
@@ -45,6 +53,9 @@ public class LoginActivity extends Activity {
     private static final String[] DUMMY_CREDENTIALS = new String[]{
             "foo@example.com:hello", "bar@example.com:world"
     };
+
+    // nahodne generovane ID telefonu
+    private String ID = Settings.Secure.ANDROID_ID;
 
     // Application shared preference file name
     public static final String PREFS_NAME = "RajcePrefs";
@@ -66,18 +77,21 @@ public class LoginActivity extends Activity {
         setContentView(R.layout.activity_login);
 
         // pripravime shared preferences pro nacteni/ulozeni hesla
-        // TODO: Crypto
         final SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        /*editor.remove("pEmail");
+        editor.remove("pPasswd");
+        editor.commit();*/
         final String pEmail = settings.getString("pEmail", null);
         final String pPasswd = settings.getString("pPasswd", null);
 
         if (pEmail != null && pPasswd != null) {
             RajceAPI api = new RajceAPI();
             if (!api.isLogin()) {
-                Log.e("pEmail", pEmail);
-                Log.e("pPasswd", pPasswd);
+                Log.e("pEmail", decrypt(pEmail));
+                Log.e("pPasswd", decrypt(pPasswd));
                 // oboje ulozene, muzeme se autentizovat podle nich
-                api.sigin(pEmail, pPasswd, new APIState() {
+                api.sigin(decrypt(pEmail), decrypt(pPasswd), new APIState() {
                     public void error(String error) {
                         Log.e("LoginTAG", error);
                     }
@@ -193,6 +207,49 @@ public class LoginActivity extends Activity {
         finish();
     }
 
+    private static byte[] getRawKey(byte[] seed) throws Exception {
+        KeyGenerator kgen = KeyGenerator.getInstance("AES");
+        SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
+        sr.setSeed(seed);
+        kgen.init(128, sr); // 192 and 256 bits may not be available
+        SecretKey skey = kgen.generateKey();
+        byte[] raw = skey.getEncoded();
+        return raw;
+    }
+
+    private String encrypt (String plainText)  {
+
+        try {
+            byte[] key = getRawKey(ID.getBytes("UTF8"));
+            byte[] byteText = plainText.getBytes("UTF8");
+            SecretKeySpec keySpec = new SecretKeySpec(key, "AES");
+            Cipher cipher = Cipher.getInstance("AES"); // cipher is not thread safe
+            cipher.init(Cipher.ENCRYPT_MODE, keySpec);
+            String result = Base64.encodeToString(cipher.doFinal(byteText), Base64.DEFAULT);
+            Log.e("Encrypt", result);
+            return result;
+        } catch (Exception e) {
+            Log.e("EncryptTag", "STACK", e);
+        }
+        return null;
+    }
+    public String decrypt(String plainText) {
+        try {
+            byte[] key = getRawKey(ID.getBytes("UTF8"));
+            byte[] byteText = Base64.decode(plainText, Base64.DEFAULT);
+            SecretKeySpec keySpec = new SecretKeySpec(key, "AES");
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.DECRYPT_MODE, keySpec);
+            String result = new String(cipher.doFinal(byteText), "UTF-8");
+            Log.e("Decrypt", result);
+            return result;
+        } catch (Exception e) {
+            Log.e("EncryptTag", "STACK", e);
+        }
+        return null;
+    }
+
+
     /**
      * Shows the progress UI and hides the login form.
      */
@@ -268,7 +325,6 @@ public class LoginActivity extends Activity {
             }
             */
             // pripravime shared preferences pro nacteni/ulozeni hesla
-            // TODO: Crypto
             final SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
 
             Looper.prepare();
@@ -282,8 +338,8 @@ public class LoginActivity extends Activity {
                         public void finish() {
                             Log.e("LoginTAG", "Test login: OK.");
                             SharedPreferences.Editor editor = settings.edit();
-                            editor.putString("pEmail", mEmail);
-                            editor.putString("pPasswd", mPassword);
+                            editor.putString("pEmail", encrypt(mEmail));
+                            editor.putString("pPasswd", encrypt(mPassword));
                             editor.commit();
                             Log.e("LoginTAG", "Preferences updated.");
                         }
