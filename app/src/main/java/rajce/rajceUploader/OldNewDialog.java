@@ -1,6 +1,7 @@
 package rajce.rajceUploader;
 
 import android.app.Activity;
+import android.app.ListActivity;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -10,31 +11,47 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
+import android.widget.Toast;
 
 
-public class OldNewDialog extends Activity implements OnItemClickListener {
-    ListView listView;
+public class OldNewDialog extends ListActivity {
+    ListView listView, listView2;
+
+    String[] itemname ={
+            "Vytvořit nové album",
+            "Chorvatsko 2014",
+            "Chorvatsko 2013",
+            "Chorvatsko 2012",
+    };
+    Integer[] imgid={
+            R.drawable.ic_launcher,
+            R.drawable.ic_launcher,
+            R.drawable.ic_launcher,
+            R.drawable.ic_launcher
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_old_new_dialog);
 
-        listView = (ListView) findViewById(R.id.oldnew_list);
-        listView.setOnItemClickListener(this);
-
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setIcon(new ColorDrawable(getResources().getColor(android.R.color.transparent)));
+
+        CustomListAdapter adapter=new CustomListAdapter(this, itemname, imgid);
+        setListAdapter(adapter);
     }
 
     @Override
-    public void onItemClick(AdapterView<?> adapter, View v, int position, long id) {
-        switch (position) {
-            case 0:
-                Intent i = new Intent(getApplicationContext(), NewAlbum.class);
-                startActivity(i);
-                break;
-            case 1:
+    protected void onListItemClick (ListView l, View v, int position, long id) {
+
+        if (position==0) {
+            Intent i = new Intent(getApplicationContext(), NewAlbum.class);
+            startActivity(i);
+        }
+        else {
+            String SelectedItem= (String)getListAdapter().getItem(position);
+            Toast.makeText(this, SelectedItem, Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -60,4 +77,5 @@ public class OldNewDialog extends Activity implements OnItemClickListener {
 
         return super.onOptionsItemSelected(item);
     }
+
 }

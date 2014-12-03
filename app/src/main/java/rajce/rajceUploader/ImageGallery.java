@@ -197,7 +197,7 @@ public class ImageGallery extends FragmentActivity implements
         }
 
         // kdyz se nenejadou vubec zadne fotky - vypise se hlaska
-        if ( cc == null ) {
+        if ( cc == null || cc.getCount() == 0 ) {
 
             // nove textview uprostred stranky
             TextView tv1 = new TextView(this);
