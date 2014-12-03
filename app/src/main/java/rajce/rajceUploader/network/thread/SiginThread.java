@@ -4,6 +4,8 @@ import android.util.Log;
 
 import java.io.StringReader;
 import java.io.StringWriter;
+import android.os.Handler;
+
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 import org.xml.sax.InputSource;
@@ -21,14 +23,16 @@ public class SiginThread extends Thread {
     private String passMD5 = null;
     private RajceHttp rajceHttp;
     private String errorText;
+    private Handler mHandler;
 
-    public SiginThread(RajceAPI rajceAPI, APIState stat, String email, String passMD5) {
+    public SiginThread(RajceAPI rajceAPI, APIState stat, String email, String passMD5, Handler mHandler) {
         super();
         this.rajceAPI = rajceAPI;
         this.stat = stat;
         this.email = email; 
         this.passMD5 = passMD5;
         this.rajceHttp = new RajceHttp();
+        this.mHandler = mHandler;
     }
 
     @Override
@@ -41,22 +45,22 @@ public class SiginThread extends Thread {
             LoginResponse loginResponse = serializer.read(LoginResponse.class, new StringReader( result ), false);
             if (loginResponse.errorCode == null) {
                 rajceAPI.setSessionToken(loginResponse.sessionToken);
-                stat.finish();
-                /*rajceAPI.mHandler.post(new Runnable() {
+                //stat.finish();
+                this.mHandler.post(new Runnable() {
                     public void run()
                     {
                         stat.finish();
                     }
-                });*/
+                });
             } else {
                 errorText = loginResponse.result;
-                stat.error(errorText);
-                /*rajceAPI.mHandler.post(new Runnable() {
+                //stat.error(errorText);
+                this.mHandler.post(new Runnable() {
                     public void run()
                     {
                         stat.error(errorText);
                     }
-                });*/
+                });
             }
         } catch (Exception e) {
             errorText = e.toString();

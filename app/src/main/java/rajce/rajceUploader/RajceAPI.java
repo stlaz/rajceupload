@@ -53,8 +53,8 @@ public class RajceAPI {
      * @param stat rozhrani pro zpetne volani informujici o vysledku operace
      * @return
      */
-    public void sigin(String email, String pass, APIState stat) {
-        SiginThread siginThread = new SiginThread(this, stat, email, MD5(pass));
+    public void sigin(String email, String pass, APIState stat, Handler mHandler) {
+        SiginThread siginThread = new SiginThread(this, stat, email, MD5(pass), mHandler);
         siginThread.start();
         try {
             siginThread.join();
@@ -137,7 +137,7 @@ public class RajceAPI {
     public static void testAPI(TextView t) {
         debug = t;
         rajceAPI = new RajceAPI();
-        if (!rajceAPI.isLogin()) {
+       /* if (!rajceAPI.isLogin()) {
             rajceAPI.sigin("tkunovsky@seznam.cz", "vutfit", new APIState() {
                 public void error(String error) {
                     debug.append("\n" + error);
@@ -150,7 +150,7 @@ public class RajceAPI {
             });
         } else {
             //testAPI1();
-        }
+        }*/
     }
     
     private static void testAPI1() { 

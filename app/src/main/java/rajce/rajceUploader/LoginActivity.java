@@ -4,12 +4,14 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
@@ -33,6 +35,8 @@ import rajce.rajceUploader.network.info.APIState;
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends Activity {
+
+    public final Handler mHandler = new Handler();
 
     /**
      * A dummy authentication store containing known user names and passwords.
@@ -67,7 +71,7 @@ public class LoginActivity extends Activity {
         final String pEmail = settings.getString("pEmail", null);
         final String pPasswd = settings.getString("pPasswd", null);
 
-        /*if (pEmail != null && pPasswd != null) {
+        if (pEmail != null && pPasswd != null) {
             RajceAPI api = new RajceAPI();
             if (!api.isLogin()) {
                 Log.e("pEmail", pEmail);
@@ -81,11 +85,11 @@ public class LoginActivity extends Activity {
                     public void finish() {
                         Log.e("LoginTAG", "Test login: OK.");
                     }
-                });
+                }, mHandler);
                 // TODO: Prechod na gallery
                 if (api.isLogin()) finish();
             }
-        }*/
+        }
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -179,6 +183,11 @@ public class LoginActivity extends Activity {
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
         return password.length() > 0;
+    }
+
+    public void startGallery() {
+        Intent intent = new Intent(this, ImageGallery.class);
+        startActivity(intent);
     }
 
     /**
@@ -275,7 +284,7 @@ public class LoginActivity extends Activity {
                             editor.commit();
                             Log.e("LoginTAG", "Preferences updated.");
                         }
-                    });
+                    }, mHandler);
                 if (!api.isLogin()) return false;
             }
 
@@ -290,7 +299,7 @@ public class LoginActivity extends Activity {
             showProgress(false);
 
             if (success) {
-                finish();
+                startGallery();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
