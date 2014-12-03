@@ -2,5 +2,11 @@
 <resources>
 
     <string name="no_photos_found">Žádné fotky</string>
+    <string-array name="action_list_co_vybirame">
+        <item>FOTKY</item>
+        <item>VIDEA</item>
+        <item>NEDÁVNÉ</item>
+    </string-array>
+
 
 </resources>
