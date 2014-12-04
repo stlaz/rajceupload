@@ -551,6 +551,9 @@ public class ImageGallery extends FragmentActivity implements
      */
     private void openNext() {
         Intent i = new Intent(getApplicationContext(), OldNewDialog.class);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("selIDs", (ArrayList<Long>) selIDs);
+        i.putExtras(bundle);
         startActivity(i);
     }
 
@@ -602,16 +605,19 @@ public class ImageGallery extends FragmentActivity implements
         if (position == 0) {
             // fotky
             mIDs = imgIDs;
+            selIDs.add(-1L);
             gridview.setAdapter(imageAdapter);
             //imageAdapter.notifyDataSetChanged();
         } else if (position == 1) {
             // videa
             mIDs = vidIDs;
+            selIDs.add(-2L);
             gridview.setAdapter(videoAdapter);
             //videoAdapter.notifyDataSetChanged();
         } else if (position == 2) {
             // nedavne fotky
             mIDs = recIDs;
+            selIDs.add(-1L);
             for (int i = 0; i < mIDs.length; i++)
                 selIDs.add(Long.parseLong(mIDs[i]));
             gridview.setAdapter(imageAdapter);

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -13,6 +14,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import rajce.rajceUploader.XML.AlbumListResponse;
 import rajce.rajceUploader.network.info.APIStateGetAlbumList;
@@ -22,6 +26,9 @@ public class OldNewDialog extends ListActivity {
 
     private Handler mHandler;
     private final int INIT_COUNT = 10;
+    ListView listView, listView2;
+    private List<Long> selIDs;
+    //private Handler mHandler;
 
     private AlbumListResponse initAlbumsList;
 
@@ -40,6 +47,10 @@ public class OldNewDialog extends ListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_old_new_dialog);
+
+        selIDs = (ArrayList<Long>) getIntent().getExtras().getSerializable("selIDs");
+        if (selIDs.contains(-1L))
+            Log.e("LISTTAG", "WORKS!");
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setIcon(new ColorDrawable(getResources().getColor(android.R.color.transparent)));
