@@ -33,15 +33,17 @@ public class AlbumListRequest {
             columns = new ArrayList<String>(Arrays.asList(poleStringu)); 
         }
         
-        public Parameters(String token) {
+        public Parameters(String token, int skip, int limit) {
             this(); 
             this.token = token;
+            this.skip = skip;
+            this.limit = limit;
         }        
     }
     
-    public AlbumListRequest(String token) {
+    public AlbumListRequest(String token, int skip, int limit) {
         super();
-        parameters = new Parameters(token);
+        parameters = new Parameters(token, skip, limit);
     }
     
     public AlbumListRequest() {
