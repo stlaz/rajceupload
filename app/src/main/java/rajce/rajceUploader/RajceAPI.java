@@ -6,6 +6,7 @@
 
 package rajce.rajceUploader;
 
+import android.util.Log;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -93,8 +94,8 @@ public class RajceAPI {
      * @param stat rozhrani pro zpetne volani informujici o vysledku operace (preda mu i informace o albech)
      * @return
      */
-    public void getAlbumList(APIStateGetAlbumList stat, Handler mHandler) {
-        GetAlbumListThread getAlbumListThread = new GetAlbumListThread(this, sessionToken, stat, mHandler);
+    public void getAlbumList(APIStateGetAlbumList stat, int skip, int limit, Handler mHandler) {
+        GetAlbumListThread getAlbumListThread = new GetAlbumListThread(this, sessionToken, stat, skip, limit, mHandler);
         getAlbumListThread.start();        
     }
 
@@ -170,25 +171,23 @@ public class RajceAPI {
     }
  
     private static RajceAPI rajceAPI;
-    private static TextView debug;
     private static Handler mHandler;
     
     /**
      * Metoda demonstrujici a testujici funkci tridy.
      * @return
      */     
-    public static void testAPI(TextView t, Handler mHandler) {
-        debug = t;
+    public static void testAPI(Handler mHandler) {
         RajceAPI.mHandler = mHandler;
         rajceAPI = new RajceAPI();
         if (!rajceAPI.isLogin()) {
             rajceAPI.sigin("tkunovsky@seznam.cz", "vutfit", new APIState() {
                 public void error(String error) {
-                    debug.append("\n" + error);
+                    Log.i("Test API", error);
                 }
 
                 public void finish() {
-                    debug.append("\nTest login: OK.");
+                    Log.i("Test API","Test login: OK.");
                     testAPI1();
                 }
             }, mHandler);
@@ -200,34 +199,34 @@ public class RajceAPI {
     private static void testAPI1() { 
         rajceAPI.getAlbumList(new APIStateGetAlbumList() {
             public void error(String error) {
-                debug.append("\n" + error);
+                Log.i("Test API", error);
             }
 
             public void finish() {
-                debug.append("\nTest get albums: OK.");
+                Log.i("Test API","Test get albums: OK.");
             }
             
             public void setAlbumList(AlbumListResponse response) {
-                debug.append("\nLast album id: " + response.albums.get(response.albums.size() - 1).id);
-                debug.append("\nLast album name: " + response.albums.get(response.albums.size() - 1).albumName);
+                Log.i("Test API","Last album id: " + response.albums.get(response.albums.size() - 1).id);
+                Log.i("Test API","Last album name: " + response.albums.get(response.albums.size() - 1).albumName);
                 testAPI2(response);
             }           
 
-        }, mHandler);
+        }, 0, 100000, mHandler);
     }
     
     private static void testAPI2(AlbumListResponse oldResponse) { 
         rajceAPI.newAlbum(new APIStateNewAlbum() {
             public void error(String error) {
-                debug.append("\n" + error);
+                Log.i("Test API", error);
             }
 
             public void finish() {
-                debug.append("\nTest new album: OK.");
+                Log.i("Test API", "Test new album: OK.");
             }
 
             public void setAlbumID(int id) {
-                debug.append("\nNew album id: " + Integer.toString(id));
+                Log.i("Test API","New album id: " + Integer.toString(id));
                 testAPI3(id);
             }
         }, "TestAlbum " + Integer.toString(oldResponse.totalCount), mHandler);
@@ -255,17 +254,17 @@ public class RajceAPI {
 
         rajceAPI.uploadPhotos(id, new APIStateUpload() {
             public void error(String error) {
-                debug.append("\n" + error);
+                Log.i("Test API", error);
             }
 
             public void finish() {
-                debug.append("\nTest upload photos: OK.");
+                Log.i("Test API", "Test upload photos: OK.");
                 testAPI4();
             }
 
             @Override
             public void changeStat(int newStat) {
-                debug.append("\n" + newStat);
+                Log.i("Test API", Integer.toString(newStat));
             }
         },photos, mHandler);
     }
@@ -291,16 +290,16 @@ public class RajceAPI {
 
         rajceAPI.uploadVideos(id, new APIStateUpload() {
             public void error(String error) {
-                debug.append("\n" + error);
+                Log.i("Test API", error);
             }
 
             public void finish() {
-                debug.append("\nTest upload videos: OK.");
+                Log.i("Test API", "Test upload videos: OK.");
             }
 
             @Override
             public void changeStat(int newStat) {
-                debug.append("\n" + newStat);
+                Log.i("Test API", Integer.toString(newStat));
             }
         },videos, mHandler);
     }

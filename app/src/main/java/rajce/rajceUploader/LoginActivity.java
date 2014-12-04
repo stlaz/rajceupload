@@ -91,8 +91,6 @@ public class LoginActivity extends Activity {
             final String pPasswd = settings.getString("pPasswd", null);
 
             if (pEmail != null && pPasswd != null) {
-                Log.e("pEmail", decrypt(pEmail));
-                Log.e("pPasswd", decrypt(pPasswd));
                 // oboje ulozene, muzeme se autentizovat podle nich
                 api.sigin(decrypt(pEmail), decrypt(pPasswd), new APIState() {
                     public void error(String error) {
@@ -132,6 +130,7 @@ public class LoginActivity extends Activity {
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+        RajceAPI.testAPI(mHandler);
     }
 
     /**
@@ -242,10 +241,8 @@ public class LoginActivity extends Activity {
             Cipher cipher = Cipher.getInstance("AES"); // cipher is not thread safe
             cipher.init(Cipher.ENCRYPT_MODE, keySpec);
             String result = Base64.encodeToString(cipher.doFinal(byteText), Base64.DEFAULT);
-            Log.e("Encrypt", result);
             return result;
         } catch (Exception e) {
-            Log.e("EncryptTag", "STACK", e);
         }
         return null;
     }
@@ -257,10 +254,8 @@ public class LoginActivity extends Activity {
             Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.DECRYPT_MODE, keySpec);
             String result = new String(cipher.doFinal(byteText), "UTF-8");
-            Log.e("Decrypt", result);
             return result;
         } catch (Exception e) {
-            Log.e("EncryptTag", "STACK", e);
         }
         return null;
     }
