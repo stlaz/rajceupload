@@ -1,10 +1,15 @@
 package rajce.rajceUploader;
 
 import android.app.Activity;
+import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -115,7 +120,28 @@ public class NewAlbum extends Activity {
                             api.uploadPhotos(id, new APIStateUpload() {
                                 @Override
                                 public void changeStat(int newStat) {
+                                    Context ctx = getApplicationContext();
+                                    Intent notificationIntent = new Intent(ctx, NewAlbum.class);
+                                    PendingIntent contentIntent = PendingIntent.getActivity(ctx,
+                                            1, notificationIntent,
+                                            PendingIntent.FLAG_CANCEL_CURRENT);
 
+                                    NotificationManager nm = (NotificationManager) ctx
+                                            .getSystemService(Context.NOTIFICATION_SERVICE);
+                                    Resources res = ctx.getResources();
+                                    Notification.Builder builder = new Notification.Builder(ctx);
+
+                                    builder.setContentIntent(contentIntent)
+                                            .setSmallIcon(R.drawable.ic_launcher)
+                                            .setLargeIcon(BitmapFactory.decodeResource(res, R.drawable.ic_launcher))
+                                            .setTicker("Nahrávám")
+                                            .setWhen(System.currentTimeMillis())
+                                            .setAutoCancel(true)
+                                            .setContentTitle("Rajče Uploader")
+                                            .setContentText(newStat+"%");
+                                    Notification n = builder.build();
+
+                                    nm.notify(88, n);
                                 }
 
                                 @Override

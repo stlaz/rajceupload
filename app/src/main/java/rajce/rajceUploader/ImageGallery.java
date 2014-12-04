@@ -198,12 +198,12 @@ public class ImageGallery extends FragmentActivity implements
                 if (selIDs.contains(id)) {
                     selIDs.remove(id);
                     image.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                    Toast.makeText(ImageGallery.this, "Deselected: " + id, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(ImageGallery.this, "Deselected: " + id, Toast.LENGTH_SHORT).show();
                 }
                 else {
                     selIDs.add(id);
                     image.setBackgroundColor(Color.parseColor("#CC3300"));
-                    Toast.makeText(ImageGallery.this, "Selected: " + id, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(ImageGallery.this, "Selected: " + id, Toast.LENGTH_SHORT).show();
                 }
             }
         });
