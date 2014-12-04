@@ -122,7 +122,7 @@ public class OldNewDialog extends ListActivity {
         }
         else {
             String SelectedItem= (String)getListAdapter().getItem(position);
-            Toast.makeText(this, SelectedItem, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, SelectedItem, Toast.LENGTH_SHORT).show();
         }
 
     }
