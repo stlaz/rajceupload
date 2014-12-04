@@ -73,7 +73,13 @@ public class ImageGallery extends FragmentActivity implements
     private Cursor cc = null;
     // pole pro ulozeni identifikatoru obrazku
     private static String[] mIDs = null;
-    // pole pro ulozeni identifikatoru vybranych obrazku
+    // pole pro ulozeni identifikatoru fotek
+    private static String[] imgIDs = null;
+    // pole pro ulozeni identifikatoru videi
+    private static String[] vidIDs = null;
+    // pole pro ulozeni identifikatoru nedavnych fotek
+    private static String[] recIDs = null;
+    // pole pro ulozeni identifikatoru vybranych fotek/videi
     private List<Long> selIDs;
     // LRU cache pro ulozeni nedavno pouzitych obrazku
     private LruCache<String, Bitmap> mMemoryCache;
@@ -166,38 +172,12 @@ public class ImageGallery extends FragmentActivity implements
 
         //centerTitleText();
 
-        // TODO: Tohle pak asi strcit do nejake jine activity
-        // Vytahneme z MediaStore vsechny fotky na SD karte
-        cc = this.getContentResolver().query(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, mProjection, null, null,
-                MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC");
-
-        // pokud se hledaji pouze nedavne fotky
-        if (recentFlg) {
-            // zda se aspon neco naslo
-            if ( cc != null && cc.moveToFirst() ) {
-                // datum nejnovejsi fotky
-                String recentDate = cc.getString(1);
-                Log.e("Date:", recentDate);
-                Calendar cal = Calendar.getInstance();
-                cal.setTimeInMillis(Long.parseLong(recentDate));
-                // prehodime na pulnoc toho sameho dne
-                cal.set(Calendar.HOUR_OF_DAY, 0);
-                cal.set(Calendar.MINUTE, 0);
-                cal.set(Calendar.SECOND, 0);
-                recentDate = String.valueOf(cal.getTimeInMillis());
-                Log.e("Date2:", recentDate);
-                // vybereme vse, co se nafotilo ten samy den
-                cc = this.getContentResolver().query(
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, mProjection,
-
-                        MediaStore.Images.ImageColumns.DATE_TAKEN + " > '" + recentDate + "'", null,
-                        MediaStore.MediaColumns._ID + " DESC");
-            }
-        }
-
+        setupRecIDs(mProjection);
+        //setupVideoIDs(mProjection);
+        setupImgIDs(mProjection);
+        mIDs = imgIDs;
         // kdyz se nenejadou vubec zadne fotky - vypise se hlaska
-        if ( cc == null || cc.getCount() == 0 ) {
+        if ( mIDs == null ) {
 
             // nove textview uprostred stranky
             TextView tv1 = new TextView(this);
@@ -213,41 +193,7 @@ public class ImageGallery extends FragmentActivity implements
             setContentView(ll);
             return;
         }
-
-        // Thread pro ziskani ID z db fotek do vlastniho pole
-        Thread t = new Thread() {
-            public void run() {
-                try {
-                    if ( cc != null && cc.moveToFirst() ) {
-                        mIDs = new String[cc.getCount()];
-                        // projedeme vsechny obrazky a vytahneme z nich ID
-                        for (int i = 0; i < cc.getCount(); i++) {
-                            cc.moveToPosition(i);
-                            mIDs[i] = cc.getString(0);
-                            if (recentFlg)
-                                selIDs.add(Long.parseLong(mIDs[i]));
-                        }
-                    }
-                    else {
-                        // sem by se to teoreticky nemelo nikdy dostat
-                        Log.e("NO_PHOTO","No recent photos found");
-                        return;
-                    }
-
-                } catch (Exception e) {
-                    return;
-                    }
-            }
-        };
-        t.start();
-
         GridView gridview = (GridView) findViewById(R.id.gridview);
-        // pockame na dobehnuti threadu pro nahravani
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         cc.close();
         gridview.setAdapter(new ImageAdapter(this));
 
@@ -268,6 +214,59 @@ public class ImageGallery extends FragmentActivity implements
                 }
             }
         });
+    }
+
+    private void setupImgIDs(String[] mProjection) {
+        cc = this.getContentResolver().query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, mProjection, null, null,
+                MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC");
+        if ( cc != null && cc.moveToFirst() ) {
+            imgIDs = new String[cc.getCount()];
+            // projedeme vsechny obrazky a vytahneme z nich ID
+            for (int i = 0; i < cc.getCount(); i++) {
+                cc.moveToPosition(i);
+                imgIDs[i] = cc.getString(0);
+            }
+        }
+        else {
+            Log.v("NO_PHOTO","No recent photos found");
+        }
+    }
+
+    private void setupRecIDs(String[] mProjection) {
+        cc = this.getContentResolver().query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, mProjection, null, null,
+                MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC");
+        if ( cc != null && cc.moveToFirst() ) {
+            // datum nejnovejsi fotky
+            String recentDate = cc.getString(1);
+            Log.e("Date:", recentDate);
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeInMillis(Long.parseLong(recentDate));
+            // prehodime na pulnoc toho sameho dne
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            recentDate = String.valueOf(cal.getTimeInMillis());
+            Log.e("Date2:", recentDate);
+            // vybereme vse, co se nafotilo ten samy den
+            cc = this.getContentResolver().query(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI, mProjection,
+
+                    MediaStore.Images.ImageColumns.DATE_TAKEN + " > '" + recentDate + "'", null,
+                    MediaStore.MediaColumns._ID + " DESC");
+        }
+        if ( cc != null && cc.moveToFirst() ) {
+            recIDs = new String[cc.getCount()];
+            // projedeme vsechny obrazky a vytahneme z nich ID
+            for (int i = 0; i < cc.getCount(); i++) {
+                cc.moveToPosition(i);
+                recIDs[i] = cc.getString(0);
+            }
+        }
+        else {
+            Log.v("NO_PHOTO","No recent photos found");
+        }
     }
 
     @Override
@@ -578,8 +577,19 @@ public class ImageGallery extends FragmentActivity implements
                 .replace(R.id.container, fragment).commit();
 
           */
-
-        Toast.makeText(ImageGallery.this,"AAA",Toast.LENGTH_SHORT).show();
+        selIDs.clear();
+        GridView gridview = (GridView) findViewById(R.id.gridview);
+        ImageAdapter adapter = (ImageAdapter) gridview.getAdapter();
+        if (position == 0) {
+            mIDs = imgIDs;
+            adapter.notifyDataSetChanged();
+        } else if (position == 2) {
+            mIDs = recIDs;
+            for (int i = 0; i < mIDs.length; i++)
+                selIDs.add(Long.parseLong(mIDs[i]));
+            adapter.notifyDataSetChanged();
+        }
+        //Toast.makeText(ImageGallery.this, String.valueOf(position) ,Toast.LENGTH_SHORT).show();
         return true;
     }
 
