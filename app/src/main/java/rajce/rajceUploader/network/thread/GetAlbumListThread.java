@@ -6,10 +6,14 @@
 
 package rajce.rajceUploader.network.thread;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.os.Handler;
 
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.URL;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 import rajce.rajceUploader.RajceAPI;
@@ -49,6 +53,13 @@ public class GetAlbumListThread extends Thread {
             serializer.write(new AlbumListRequest(token, skip, limit), sw);
             String result = rajceHttp.sendRequest(sw.toString());
             albumListResponse = serializer.read(AlbumListResponse.class, new StringReader( result ), false );
+            for (int i = 0; i < albumListResponse.albums.size(); i++) {
+                ;
+                URL url = new URL(albumListResponse.albums.get(i).thumbUrl);
+                albumListResponse.albums.get(i).coverPhoto = BitmapFactory.decodeStream(url.openConnection().getInputStream());
+            }
+
+
             if (albumListResponse.errorCode == null) {
                 rajceAPI.setSessionToken(albumListResponse.sessionToken);
                 mHandler.post(new Runnable() {
