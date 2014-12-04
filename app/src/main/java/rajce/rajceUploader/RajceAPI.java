@@ -23,8 +23,17 @@ public class RajceAPI {
         sessionToken = token;
     }
     
-    public RajceAPI() {
+    private RajceAPI() {
         super();
+    }
+
+    private static RajceAPI instance = null;
+
+    public static RajceAPI getInstance() {
+        if(instance == null) {
+            instance = new RajceAPI();
+        }
+        return instance;
     }
     
     static public class Photo {
