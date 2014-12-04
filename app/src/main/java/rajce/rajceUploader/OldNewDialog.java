@@ -19,18 +19,15 @@ import rajce.rajceUploader.network.info.APIStateGetAlbumList;
 
 
 public class OldNewDialog extends ListActivity {
-    ListView listView, listView2;
 
-    //private Handler mHandler;
+    private Handler mHandler;
+    private final int INIT_COUNT = 10;
 
-    //private AlbumListResponse existingAlbumsList;
+    private AlbumListResponse initAlbumsList;
 
-    private String[] itemname= {
-            "Vytvořit nové album",
-            "Chorvatsko 2014",
-            "Chorvatsko 2013",
-            "Chorvatsko 2012"
-    };
+    private String[] itemname;
+    private String[] describe;
+    private boolean[] downloaded;
 
     private Integer[] imgid={
             R.drawable.ic_launcher,
@@ -48,15 +45,36 @@ public class OldNewDialog extends ListActivity {
         getActionBar().setIcon(new ColorDrawable(getResources().getColor(android.R.color.transparent)));
 
 
-        //mHandler = new Handler();
+        mHandler = new Handler();
 
-        //RajceAPI api = RajceAPI.getInstance();
+        RajceAPI api = RajceAPI.getInstance();
 
-        /*
+
         api.getAlbumList(new APIStateGetAlbumList() {
             @Override
             public void setAlbumList(AlbumListResponse albumList) {
-                existingAlbumsList = albumList;
+                initAlbumsList = albumList;
+                itemname = new String[initAlbumsList.totalCount + 1];
+                describe = new String[initAlbumsList.totalCount + 1];
+                downloaded = new boolean[initAlbumsList.totalCount + 1];
+                itemname[0] = "Vytvořit nové album";
+                downloaded[0] = true;
+                for (int i = 1; i < (initAlbumsList.totalCount + 1); i++) {
+                    if (i < (INIT_COUNT + 1)) {
+                        downloaded[i] = true;
+                        itemname[i] = initAlbumsList.albums.get(i - 1).albumName;
+                        describe[i] = "Fotek " + initAlbumsList.albums.get(i - 1).photoCount + " videí "+ initAlbumsList.albums.get(i - 1).videoCount;
+                    } else {
+                        itemname[i] = "Načítám album";
+                        downloaded[i] = false;
+                    }
+
+
+                }
+
+                CustomListAdapter adapter=new CustomListAdapter(OldNewDialog.this, itemname, describe, downloaded, imgid, mHandler);
+                OldNewDialog.this.setListAdapter(adapter);
+
             }
 
             @Override
@@ -66,18 +84,13 @@ public class OldNewDialog extends ListActivity {
 
             @Override
             public void finish() {
-                itemname = new String[existingAlbumsList.totalCount];
-                for (int i=0;i<existingAlbumsList.totalCount;i++)
-                {
-                    itemname[i] = existingAlbumsList.albums.get(i).albumName;
-                }
+
             }
-        },mHandler);
+        }, 0 , INIT_COUNT, mHandler);
 
-*/
 
-        CustomListAdapter adapter=new CustomListAdapter(this, itemname, imgid);
-        setListAdapter(adapter);
+
+
     }
 
     @Override
