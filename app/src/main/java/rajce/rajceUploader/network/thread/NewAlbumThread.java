@@ -1,4 +1,12 @@
+/**
+ * Nazev: NewAlbumThread.java
+ * Autor: Tomas Kunovsky
+ * Popis: Vlakno pro vytvoreni noveho alba prihlaseneho uzivatele.
+ */
+
 package rajce.rajceUploader.network.thread;
+
+import android.os.Handler;
 
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -23,9 +31,10 @@ public class NewAlbumThread extends Thread  {
     private RajceHttp rajceHttp;
     private NewAlbumResponse newAlbumResponse;
     private String errorText;
+    private Handler mHandler;
     
     
-    public NewAlbumThread(RajceAPI rajceAPI, String sessionToken, APIStateNewAlbum stat, String name, String albumDescription, int visibleInt, int secureInt, String secureName, String securePass) {
+    public NewAlbumThread(RajceAPI rajceAPI, String sessionToken, APIStateNewAlbum stat, String name, String albumDescription, int visibleInt, int secureInt, String secureName, String securePass, Handler mHandler) {
         super();
         this.rajceAPI = rajceAPI;
         this.stat = stat;        
@@ -37,6 +46,7 @@ public class NewAlbumThread extends Thread  {
         this.secureName = secureName;
         this.securePass = securePass;    
         this.rajceHttp = new RajceHttp();
+        this.mHandler = mHandler;
     }
     
     @Override
@@ -49,7 +59,7 @@ public class NewAlbumThread extends Thread  {
             newAlbumResponse = serializer.read(NewAlbumResponse.class, new StringReader( result ), false );
             if (newAlbumResponse.errorCode == null) {
                 rajceAPI.setSessionToken(newAlbumResponse.sessionToken);
-                rajceAPI.mHandler.post(new Runnable() {
+                mHandler.post(new Runnable() {
                     public void run()
                     {
                         stat.finish();
@@ -58,7 +68,7 @@ public class NewAlbumThread extends Thread  {
                 });
             } else {
                 errorText = newAlbumResponse.result;
-                rajceAPI.mHandler.post(new Runnable() {
+                mHandler.post(new Runnable() {
                     public void run()
                     {
                         stat.error(errorText);
@@ -67,7 +77,7 @@ public class NewAlbumThread extends Thread  {
             }
         } catch (Exception e) {
             errorText = e.toString();
-            rajceAPI.mHandler.post(new Runnable() {
+            mHandler.post(new Runnable() {
                 public void run()
                 {
                     stat.error(errorText);

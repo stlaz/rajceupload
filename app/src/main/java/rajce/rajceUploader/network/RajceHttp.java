@@ -3,26 +3,34 @@ package rajce.rajceUploader.network;
 import java.net.*;
 import java.io.*;
 import rajce.rajceUploader.RajceAPI;
-import android.graphics.Bitmap;
+import rajce.rajceUploader.network.thread.StateUploadVideos;
+import rajce.rajceUploader.network.thread.UploadVideosThread;
 
+import android.graphics.Bitmap;
 
 public class RajceHttp {
     final private String rajceAPIUrl = "http://www.rajce.idnes.cz/liveAPI/index.php"; //adresa vstupniho bodu pro komunikaci
-    final private String boundary = "---------------------------7d226f700d0";
+    final private String boundary = "---------------------------7d226f700d0"; //unikatni oddelovat v protokolu http
     private boolean monitor = false;
-    public static interface StateUpload {
+    private StatePhotoUpload stat;
+
+    public static interface StatePhotoUpload {
         void changeStat(int newStat);
     }
-    private StateUpload stat;
 
     public RajceHttp() {
         super();
     }
-    
+
+    /**
+     * Posle XML dokument serveru a prijme od nej XML dokument.
+     * @param request XML dokument
+     * @return prijaty XML dokument
+     */
     public String sendRequest(String request) throws Exception { 
-        request = request.replaceAll("&amp;", "%26amp%3B");
+        request = request.replaceAll("&amp;", "%26amp%3B");//prekodoje v XML vsechny ampersandy
         String result = "";
-        String urlParameters = "data=" + request;
+        String urlParameters = "data=" + request; //pripoji k http pozadovane XML
         URL url = new URL(rajceAPIUrl);
         URLConnection conn = url.openConnection();
 
@@ -83,8 +91,16 @@ public class RajceHttp {
         out.writeBytes("\r\n");
         out.writeBytes("--" + boundary + "\r\n");
     }
-    
-    public String sendPhoto(String xml, Bitmap image, Bitmap thumb, RajceAPI.Photo photo, StateUpload stat) throws Exception  {
+
+    /**
+     * Posle fotku na rajce a prijme odpoved ve formatu XML dokumentu.
+     * @param xml XML dokument s pozadovanymi informacemi
+     * @param image fotografie
+     * @param thumb nahled fotografie
+     * @param stat rozhrani pro zasilani informaci o stavu uploadu
+     * @return odpoved (XML) od serveru
+     */
+    public String sendPhoto(String xml, Bitmap image, Bitmap thumb, RajceAPI.Photo photo, StatePhotoUpload stat) throws Exception  {
         this.stat = stat;
         URL url = new URL(rajceAPIUrl);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -95,6 +111,7 @@ public class RajceHttp {
         conn.setRequestProperty("Content-type","multipart/form-data; boundary=" + boundary);
         DataOutputStream dataStream = new DataOutputStream(conn.getOutputStream()); 
         dataStream.writeBytes("--" + boundary + "\r\n");
+        monitor = false; //rika, zda ma informovat o stavu nahravani
         writeImage(thumb, "thumb", photo.fullFileName, dataStream);
         monitor = true;
         writeImage(image, "photo", photo.fullFileName, dataStream);
@@ -111,6 +128,70 @@ public class RajceHttp {
 
         reader.close();
         return result;
+    }
+
+    public String sendEndVideo(String xml, Bitmap image, Bitmap thumb, RajceAPI.Video video) throws Exception   {
+        URL url = new URL(rajceAPIUrl);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestProperty("Accept-Charset", "UTF-8");
+        conn.setDoInput(true);
+        conn.setDoOutput(true);
+        conn.setUseCaches(false);
+        conn.setRequestProperty("Content-type","multipart/form-data; boundary=" + boundary);
+        DataOutputStream dataStream = new DataOutputStream(conn.getOutputStream());
+        dataStream.writeBytes("--" + boundary + "\r\n");
+        monitor = false; //rika, zda ma informovat o stavu nahravani
+        writeImage(thumb, "thumb", video.fullFileName, dataStream);
+        writeImage(image, "image", video.fullFileName, dataStream);
+        writeXML(xml, dataStream);
+        dataStream.flush();
+        dataStream.close();
+        String result = "";
+        String line;
+        BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+        while ((line = reader.readLine()) != null) {
+            result += line;
+        }
+
+        reader.close();
+        return result;
+
+    }
+
+    public String sendVideoBlock(String xml,  UploadVideosThread.Blocks blocks) throws Exception {
+        URL url = new URL(rajceAPIUrl);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestProperty("Accept-Charset", "UTF-8");
+        conn.setDoInput(true);
+        conn.setDoOutput(true);
+        conn.setUseCaches(false);
+        conn.setRequestProperty("Content-type","multipart/form-data; boundary=" + boundary);
+        DataOutputStream dataStream = new DataOutputStream(conn.getOutputStream());
+        dataStream.writeBytes("--" + boundary + "\r\n");
+        writeVideoBlock(blocks.getBlock(), "data" + blocks.getAIndex(), blocks.getFullName(), dataStream);
+        writeXML(xml, dataStream);
+        dataStream.flush();
+        dataStream.close();
+        String result = "";
+        String line;
+        BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+        while ((line = reader.readLine()) != null) {
+            result += line;
+        }
+
+        reader.close();
+        return result;
+
+    }
+
+    private void writeVideoBlock(byte[] block, String name, String filename, DataOutputStream out) throws Exception  {
+        out.writeBytes("Content-Disposition: form-data; name=\"" + name +"\"; filename=\"" + filename + "\"\r\n");
+        out.writeBytes("Content-Type: application/octet-stream\r\n");
+        out.writeBytes("\r\n");
+        ByteArrayOutputStream bas = new ByteArrayOutputStream();
+        out.write(block);
+        out.writeBytes("\r\n");
+        out.writeBytes("--" + boundary + "\r\n");
     }
 
 }

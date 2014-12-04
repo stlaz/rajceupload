@@ -1,3 +1,9 @@
+/**
+ * Nazev: RajceAPI.java
+ * Autor: Tomas Kunovsky
+ * Popis: Vytvari abstrakci nad API http://www.rajce.idnes.cz/static/doc/LiveApi.html.
+ */
+
 package rajce.rajceUploader;
 
 import android.widget.TextView;
@@ -13,7 +19,6 @@ import java.io.FilenameFilter;
 
 public class RajceAPI {
     private String sessionToken = null;  
-    public final Handler mHandler = new Handler();
     synchronized public void setSessionToken(String token) {
         sessionToken = token;
     }
@@ -38,8 +43,24 @@ public class RajceAPI {
         }
     }
 
+    static public class Video {
+        public String fullFileName;
+        public String name;
+        public String description;
+
+        public Video(String fullFileName) {
+            this.fullFileName = fullFileName;
+        }
+
+        public Video(String fullFileName, String name, String description) {
+            this.fullFileName = fullFileName;
+            this.name = name;
+            this.description = description;
+        }
+    }
+
     /**
-     * Vrati true, pokud je nutne se prihlasit (ziskat od uzivatele login a heslo).
+     * Vrati false, pokud je nutne se prihlasit (ziskat od uzivatele login a heslo).
      * @return
      */
     public boolean isLogin() {
@@ -56,11 +77,6 @@ public class RajceAPI {
     public void sigin(String email, String pass, APIState stat, Handler mHandler) {
         SiginThread siginThread = new SiginThread(this, stat, email, MD5(pass), mHandler);
         siginThread.start();
-        try {
-            siginThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -68,8 +84,8 @@ public class RajceAPI {
      * @param stat rozhrani pro zpetne volani informujici o vysledku operace (preda mu i informace o albech)
      * @return
      */
-    public void getAlbumList(APIStateGetAlbumList stat) {
-        GetAlbumListThread getAlbumListThread = new GetAlbumListThread(this, sessionToken, stat);
+    public void getAlbumList(APIStateGetAlbumList stat, Handler mHandler) {
+        GetAlbumListThread getAlbumListThread = new GetAlbumListThread(this, sessionToken, stat, mHandler);
         getAlbumListThread.start();        
     }
 
@@ -79,8 +95,8 @@ public class RajceAPI {
      * @param name nazev alba
      * @return
      */
-    public void newAlbum(APIStateNewAlbum stat, String name) {
-        this.newAlbumAdvanced(stat, name, null, true, false, null, null);
+    public void newAlbum(APIStateNewAlbum stat, String name, Handler mHandler) {
+        this.newAlbumAdvanced(stat, name, null, true, false, null, null, mHandler);
     }
 
     /**
@@ -94,10 +110,10 @@ public class RajceAPI {
      * @param securePass null pokud je secure false, jinak plaintext
      * @return
      */
-    public void newAlbumAdvanced(APIStateNewAlbum stat, String name, String albumDescription, boolean visible, boolean secure, String secureName, String securePass) {
+    public void newAlbumAdvanced(APIStateNewAlbum stat, String name, String albumDescription, boolean visible, boolean secure, String secureName, String securePass, Handler mHandler) {
         int visibleInt = visible ? 1 : 0;
         int secureInt = secure ? 1 : 0;
-        NewAlbumThread newAlbumThread = new NewAlbumThread(this, sessionToken, stat, name, albumDescription, visibleInt, secureInt, secureName, securePass);
+        NewAlbumThread newAlbumThread = new NewAlbumThread(this, sessionToken, stat, name, albumDescription, visibleInt, secureInt, secureName, securePass, mHandler);
         newAlbumThread.start();         
     }
 
@@ -108,11 +124,28 @@ public class RajceAPI {
      * @param photos informace o fotografiich pro upload
      * @return
      */
-    public void uploadPhotos(int albumID, APIStateUpload stat, ArrayList<Photo> photos) {
-        UploadPhotosThread uploadPhotosThread = new UploadPhotosThread(albumID, this, sessionToken, stat, photos);
-        uploadPhotosThread.start();        
+    public void uploadPhotos(int albumID, APIStateUpload stat, ArrayList<Photo> photos, Handler mHandler) {
+        UploadPhotosThread uploadPhotosThread = new UploadPhotosThread(albumID, this, sessionToken, stat, photos, mHandler);
+        uploadPhotosThread.start();
     }
-    
+
+    /**
+     * Hromadny upload videi.
+     * @param albumID identifikator ciloveho alba
+     * @param stat rozhrani pro zpetne volani informujici o vysledku operace
+     * @param videos informace o videich pro upload
+     * @return
+     */
+    public void uploadVideos(int albumID, APIStateUpload stat, ArrayList<Video> videos, Handler mHandler) {
+        UploadVideosThread uploadVideosThread = new UploadVideosThread(albumID, this, sessionToken, stat, videos, mHandler);
+        uploadVideosThread.start();
+    }
+
+    /**
+     * Provede MD5 hash retezce.
+     * @param md5 retezec na ktery se ma aplikovat hash
+     * @return
+     */
     public static String MD5(String md5) {
        try {
             java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
@@ -129,15 +162,17 @@ public class RajceAPI {
  
     private static RajceAPI rajceAPI;
     private static TextView debug;
+    private static Handler mHandler;
     
     /**
      * Metoda demonstrujici a testujici funkci tridy.
      * @return
      */     
-    public static void testAPI(TextView t) {
+    public static void testAPI(TextView t, Handler mHandler) {
         debug = t;
+        RajceAPI.mHandler = mHandler;
         rajceAPI = new RajceAPI();
-       /* if (!rajceAPI.isLogin()) {
+        if (!rajceAPI.isLogin()) {
             rajceAPI.sigin("tkunovsky@seznam.cz", "vutfit", new APIState() {
                 public void error(String error) {
                     debug.append("\n" + error);
@@ -145,12 +180,12 @@ public class RajceAPI {
 
                 public void finish() {
                     debug.append("\nTest login: OK.");
-                    //testAPI1();
+                    testAPI1();
                 }
-            });
+            }, mHandler);
         } else {
-            //testAPI1();
-        }*/
+            testAPI1();
+        }
     }
     
     private static void testAPI1() { 
@@ -169,7 +204,7 @@ public class RajceAPI {
                 testAPI2(response);
             }           
 
-        });
+        }, mHandler);
     }
     
     private static void testAPI2(AlbumListResponse oldResponse) { 
@@ -186,10 +221,12 @@ public class RajceAPI {
                 debug.append("\nNew album id: " + Integer.toString(id));
                 testAPI3(id);
             }
-        }, "TestAlbum " + Integer.toString(oldResponse.totalCount));
+        }, "TestAlbum " + Integer.toString(oldResponse.totalCount), mHandler);
     }    
    
     private static void testAPI3(int id) {
+        RajceAPI.id = id;
+
         ArrayList<Photo> photos = new ArrayList<Photo>();
 
         File rootsd = Environment.getExternalStorageDirectory();
@@ -214,12 +251,48 @@ public class RajceAPI {
 
             public void finish() {
                 debug.append("\nTest upload photos: OK.");
+                testAPI4();
             }
 
             @Override
             public void changeStat(int newStat) {
                 debug.append("\n" + newStat);
             }
-        },photos);        
+        },photos, mHandler);
+    }
+    private static int id;
+
+    private static void testAPI4() {
+        ArrayList<Video> videos = new ArrayList<Video>();
+
+        File rootsd = Environment.getExternalStorageDirectory();
+        File dcim = new File(rootsd.getAbsolutePath() + "/DCIM/100ANDRO");
+        File[] imagelist = dcim.listFiles(new FilenameFilter(){
+
+            public boolean accept(File dir, String name)
+            {
+                return ((name.endsWith(".mp4")));
+            }
+        });
+
+        for(int i= 0 ; i< imagelist.length; i++)
+        {
+            videos.add(new Video(imagelist[i].getAbsolutePath()));
+        }
+
+        rajceAPI.uploadVideos(id, new APIStateUpload() {
+            public void error(String error) {
+                debug.append("\n" + error);
+            }
+
+            public void finish() {
+                debug.append("\nTest upload videos: OK.");
+            }
+
+            @Override
+            public void changeStat(int newStat) {
+                debug.append("\n" + newStat);
+            }
+        },videos, mHandler);
     }
 }

@@ -1,19 +1,25 @@
-package rajce.rajceUploader.network.thread;
+/**
+ * Nazev: SiginThread.java
+ * Autor: Tomas Kunovsky
+ * Popis: Vlakno pro prihlaseni uzivatele.
+ */
 
-import android.util.Log;
+package rajce.rajceUploader.network.thread;
 
 import java.io.StringReader;
 import java.io.StringWriter;
-import android.os.Handler;
+import java.util.Arrays;
 
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
-import org.xml.sax.InputSource;
 import rajce.rajceUploader.RajceAPI;
 import rajce.rajceUploader.network.info.*;
 import rajce.rajceUploader.XML.LoginRequest;
 import rajce.rajceUploader.XML.LoginResponse;
 import rajce.rajceUploader.network.RajceHttp;
+
+import android.os.Handler;
+import android.util.Log;
 
 
 public class SiginThread extends Thread {
@@ -40,34 +46,32 @@ public class SiginThread extends Thread {
         Serializer serializer = new Persister();
         try {
             StringWriter sw = new StringWriter();
-            serializer.write(new LoginRequest(email, passMD5), sw);
-            String result = rajceHttp.sendRequest(sw.toString());
-            LoginResponse loginResponse = serializer.read(LoginResponse.class, new StringReader( result ), false);
-            if (loginResponse.errorCode == null) {
-                rajceAPI.setSessionToken(loginResponse.sessionToken);
-                //stat.finish();
-                this.mHandler.post(new Runnable() {
+            serializer.write(new LoginRequest(email, passMD5), sw);//serializuje data do XML
+            String result = rajceHttp.sendRequest(sw.toString()); //posle a nasledne ziska XML ze serveru
+            LoginResponse loginResponse = serializer.read(LoginResponse.class, new StringReader( result ), false); //deserializuje XML do objektu
+            if (loginResponse.errorCode == null) { //pokus server nevratil chybu
+                rajceAPI.setSessionToken(loginResponse.sessionToken); //nastavim session retezec (neco jako cookie)
+                mHandler.post(new Runnable() {
                     public void run()
                     {
-                        stat.finish();
+                        stat.finish();//poslu zpravu pres callback ze vse dopadlo v poradku
                     }
                 });
             } else {
                 errorText = loginResponse.result;
-                //stat.error(errorText);
-                this.mHandler.post(new Runnable() {
+                mHandler.post(new Runnable() {
                     public void run()
                     {
-                        stat.error(errorText);
+                        stat.error(errorText);//preposlu zpravu o chybe
                     }
                 });
             }
         } catch (Exception e) {
-            errorText = e.toString();
-            rajceAPI.mHandler.post(new Runnable() {
+            errorText = Arrays.toString(e.getStackTrace());
+            mHandler.post(new Runnable() {
                 public void run()
                 {
-                    stat.error(errorText);
+                    stat.error(errorText);//preposlu zpravu o chybe
                 }
             });
         }
