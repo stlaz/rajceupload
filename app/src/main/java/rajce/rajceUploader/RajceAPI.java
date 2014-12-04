@@ -26,7 +26,7 @@ public class RajceAPI {
     private RajceAPI() {
         super();
     }
- 
+
     private static RajceAPI instance = null;
 
     public static RajceAPI getInstance() {
