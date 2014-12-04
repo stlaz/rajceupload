@@ -551,9 +551,7 @@ public class ImageGallery extends FragmentActivity implements
      */
     private void openNext() {
         Intent i = new Intent(getApplicationContext(), OldNewDialog.class);
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("selIDs", (ArrayList<Long>) selIDs);
-        i.putExtras(bundle);
+        MediaSingleton.getInstance().setList(selIDs);
         startActivity(i);
     }
 

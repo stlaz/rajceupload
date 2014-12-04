@@ -31,6 +31,7 @@ public class OldNewDialog extends ListActivity {
     private Handler mHandler;
     private final int INIT_COUNT = 10;
     ListView listView, listView2;
+    private Bundle selectedMedia;
     private List<Long> selIDs;
     //private Handler mHandler;
 
@@ -46,10 +47,6 @@ public class OldNewDialog extends ListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_old_new_dialog);
-
-        selIDs = (ArrayList<Long>) getIntent().getExtras().getSerializable("selIDs");
-        if (selIDs.contains(-1L))
-            Log.e("LISTTAG", "WORKS!");
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setIcon(new ColorDrawable(getResources().getColor(android.R.color.transparent)));
