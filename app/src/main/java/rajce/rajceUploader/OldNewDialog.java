@@ -17,6 +17,9 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import rajce.rajceUploader.XML.AlbumListResponse;
@@ -35,7 +38,7 @@ public class OldNewDialog extends ListActivity {
 
     private String[] itemname;
     private String[] describe;
-    private boolean[] downloaded;
+    private ArrayList<Boolean> downloaded;
 
     private Bitmap[] covers;
 
@@ -63,26 +66,36 @@ public class OldNewDialog extends ListActivity {
                 initAlbumsList = albumList;
                 itemname = new String[initAlbumsList.totalCount + 1];
                 describe = new String[initAlbumsList.totalCount + 1];
-                downloaded = new boolean[initAlbumsList.totalCount + 1];
+                downloaded = new ArrayList<Boolean>();
                 covers = new Bitmap[initAlbumsList.totalCount + 1];
                 itemname[0] = "Vytvořit nové album";
-                downloaded[0] = true;
+                downloaded.add(true);
                 for (int i = 1; i < (initAlbumsList.totalCount + 1); i++) {
                     if (i < (INIT_COUNT + 1)) {
-                        downloaded[i] = true;
+                        downloaded.add(true);
                         itemname[i] = initAlbumsList.albums.get(i - 1).albumName;
                         describe[i] = "Fotek " + initAlbumsList.albums.get(i - 1).photoCount + " videí "+ initAlbumsList.albums.get(i - 1).videoCount;
                         covers[i] = initAlbumsList.albums.get(i - 1).coverPhoto;
                     } else {
                         itemname[i] = "Načítám album";
-                        downloaded[i] = false;
+                        downloaded.add(false);
                         covers[i] = null;
                     }
 
 
                 }
 
-                CustomListAdapter adapter=new CustomListAdapter(OldNewDialog.this, itemname, describe, downloaded, covers, mHandler);
+                List<String> names =  Collections.synchronizedList(new ArrayList<String>(Arrays.asList(itemname)));
+                List<String> describes =  Collections.synchronizedList(new ArrayList<String>(Arrays.asList(describe)));
+                List<Boolean> downloadeds =  Collections.synchronizedList(new ArrayList<Boolean>(downloaded));
+                List<Bitmap> cover =  Collections.synchronizedList(new ArrayList<Bitmap>(Arrays.asList(covers)));
+
+
+
+
+
+
+                CustomListAdapter adapter=new CustomListAdapter(OldNewDialog.this, names, describes, downloadeds, cover, mHandler);
                 OldNewDialog.this.setListAdapter(adapter);
 
             }
