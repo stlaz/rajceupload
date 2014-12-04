@@ -11,16 +11,18 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.List;
+
 import rajce.rajceUploader.XML.AlbumListResponse;
 import rajce.rajceUploader.network.info.APIStateGetAlbumList;
 
 public class CustomListAdapter extends ArrayAdapter<String> {
 
     private Activity context;
-    private String[] itemname;
-    private String[] describe;
-    private Bitmap[] covers;
-    private boolean[] downloaded;
+    private List<String> itemname;
+    private List<String> describe;
+    private List<Bitmap> covers;
+    private List<Boolean> downloaded;
     private AlbumListResponse alr;
     private Handler mHandler;
     private ListActivity listActivity;
@@ -28,7 +30,7 @@ public class CustomListAdapter extends ArrayAdapter<String> {
     private final int defaultCover = R.drawable.ic_launcher;
 
 
-    public CustomListAdapter(Activity context, String[] itemname, String[] describe, boolean[] downloaded, Bitmap[] covers, Handler mHandler) {
+    public CustomListAdapter(Activity context, List<String> itemname, List<String> describe, List<Boolean> downloaded, List<Bitmap> covers, Handler mHandler) {
         super(context, R.layout.list_item_album, itemname);
         this.mHandler = mHandler;
         this.mHandler = new Handler();
@@ -46,12 +48,12 @@ public class CustomListAdapter extends ArrayAdapter<String> {
 
     private static class Callback implements APIStateGetAlbumList {
         private int pos;
-        private String[] itemname;
-        private String[] describe;
+        private List<String> itemname;
+        private List<String> describe;
         private ListActivity listActivity;
         private ArrayAdapter<String> adapter;
-        private Bitmap[] covers;
-        public Callback(int pos, String[] itemname, String[] describe, ArrayAdapter<String> adapter, Bitmap[] covers) {
+        private List<Bitmap> covers;
+        public Callback(int pos, List<String> itemname, List<String> describe, ArrayAdapter<String> adapter, List<Bitmap> covers) {
             this.pos = pos;
             this.itemname = itemname;
             this.describe = describe;
@@ -63,9 +65,9 @@ public class CustomListAdapter extends ArrayAdapter<String> {
         @Override
         public void setAlbumList(AlbumListResponse albumList) {
             for (int i = 0; i < albumList.albums.size(); i++) {
-                itemname[i + pos] = /*Integer.toString(i+pos) +*/ albumList.albums.get(i).albumName;
-                this.describe[i + pos] = "Fotek " + albumList.albums.get(i).photoCount + " videí "+ albumList.albums.get(i).videoCount;
-                this.covers[i + pos] = albumList.albums.get(i).coverPhoto;
+                itemname.set(i + pos,albumList.albums.get(i).albumName);
+                describe.set(i + pos,"Fotek " + albumList.albums.get(i).photoCount + " videí "+ albumList.albums.get(i).videoCount);
+                this.covers.set(i + pos, albumList.albums.get(i).coverPhoto);
             }
 
 
@@ -95,22 +97,22 @@ public class CustomListAdapter extends ArrayAdapter<String> {
         ImageView imageView = (ImageView) rowView.findViewById(R.id.icon);
         TextView extratxt = (TextView) rowView.findViewById(R.id.item_album_desc);
 
-        txtTitle.setText(this.itemname[position]);
-        if (this.covers[position] == null) {
+        txtTitle.setText(this.itemname.get(position));
+        if (this.covers.get(position) == null) {
             imageView.setImageResource(this.defaultCover);
         } else {
-            imageView.setImageBitmap(this.covers[position]);
+            imageView.setImageBitmap(this.covers.get(position));
         }
 
-        extratxt.setText(this.describe[position]);
+        extratxt.setText(this.describe.get(position));
 
-        if (!downloaded[position]) {
+        if (!downloaded.get(position)) {
 
             Callback callback = new Callback(position,itemname, describe, this, covers );
             RajceAPI.getInstance().getAlbumList(callback, position - 1, REFRESH_COUNT , mHandler );
-            int bound = Math.min((REFRESH_COUNT + position), downloaded.length);
+            int bound = Math.min((REFRESH_COUNT + position), downloaded.size());
             for (int i = position; i < bound; i++) {
-                downloaded[i] = true;
+                downloaded.set(i, true);
             }
 
         }
