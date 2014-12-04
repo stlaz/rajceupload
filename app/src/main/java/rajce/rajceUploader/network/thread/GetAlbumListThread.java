@@ -26,14 +26,18 @@ public class GetAlbumListThread extends Thread {
     private AlbumListResponse albumListResponse;
     private String errorText;
     private Handler mHandler;
+    private int skip;
+    private int limit;
     
-    public GetAlbumListThread(RajceAPI rajceAPI, String token, APIStateGetAlbumList stat, Handler mHandler) {
+    public GetAlbumListThread(RajceAPI rajceAPI, String token, APIStateGetAlbumList stat, int skip, int limit, Handler mHandler) {
         super();
         this.rajceAPI = rajceAPI;
         this.token = token;
         this.stat = stat;
         this.rajceHttp = new RajceHttp();
         this.mHandler = mHandler;
+        this.skip = skip;
+        this.limit = limit;
     }
     
     @Override
@@ -42,7 +46,7 @@ public class GetAlbumListThread extends Thread {
 
         try {
             StringWriter sw = new StringWriter();
-            serializer.write(new AlbumListRequest(token), sw);
+            serializer.write(new AlbumListRequest(token, skip, limit), sw);
             String result = rajceHttp.sendRequest(sw.toString());
             albumListResponse = serializer.read(AlbumListResponse.class, new StringReader( result ), false );
             if (albumListResponse.errorCode == null) {
