@@ -56,13 +56,6 @@ public class ImageGallery extends FragmentActivity implements
 
     private static final String STATE_SELECTED_NAVIGATION_ITEM = "selected_navigation_item";
 
-    public void setRecentFlg(boolean recentFlg) {
-        this.recentFlg = recentFlg;
-    }
-
-    // flag pro zpracovani nedavnych fotek
-    private boolean recentFlg = false;
-
     public void setLayout(int layout) {
         this.layout = layout;
     }
@@ -83,8 +76,12 @@ public class ImageGallery extends FragmentActivity implements
     private List<Long> selIDs;
     // LRU cache pro ulozeni nedavno pouzitych obrazku
     private LruCache<String, Bitmap> mMemoryCache;
+    private GridView gridview = null;
     private int viewBorder;
     private int viewWidth;
+
+    private ImageAdapter imageAdapter = new ImageAdapter(this, 0L);
+    private ImageAdapter videoAdapter = new ImageAdapter(this, 1L);
 
     private SpinnerAdapter mSpinnerAdapter;
 
@@ -115,7 +112,8 @@ public class ImageGallery extends FragmentActivity implements
         final int cacheSize = maxMemory / 16;
 
         super.onCreate(savedInstanceState);
-
+        setContentView(R.layout.activity_img_gallery);
+        gridview = (GridView) findViewById(R.id.gridview);
 
         // vytvoreni/ziskani fragmentu pro ulozeni cache a vybranych fotek
         RetainFragment retainFragment =
@@ -140,10 +138,6 @@ public class ImageGallery extends FragmentActivity implements
             selIDs = new ArrayList<Long>();
             retainFragment.selIDs = selIDs;
         }
-        if (layout == -1)
-            setContentView(R.layout.activity_img_gallery);
-        else
-            setContentView(layout);
 
         // Nastavení textu titulku, odstranění ikony
         //setTitle("FOTOGRAFIE ▼");
@@ -173,7 +167,7 @@ public class ImageGallery extends FragmentActivity implements
         //centerTitleText();
 
         setupRecIDs(mProjection);
-        //setupVideoIDs(mProjection);
+        setupVidIDs(mProjection);
         setupImgIDs(mProjection);
         mIDs = imgIDs;
         // kdyz se nenejadou vubec zadne fotky - vypise se hlaska
@@ -193,9 +187,8 @@ public class ImageGallery extends FragmentActivity implements
             setContentView(ll);
             return;
         }
-        GridView gridview = (GridView) findViewById(R.id.gridview);
         cc.close();
-        gridview.setAdapter(new ImageAdapter(this));
+        gridview.setAdapter(imageAdapter);
 
         // kliknuti na item na dane pozici
         gridview.setOnItemClickListener(new OnItemClickListener() {
@@ -229,7 +222,24 @@ public class ImageGallery extends FragmentActivity implements
             }
         }
         else {
-            Log.v("NO_PHOTO","No recent photos found");
+            Log.v("NO_PHOTO","No photos found");
+        }
+    }
+
+    private void setupVidIDs(String[] mProjection) {
+        cc = this.getContentResolver().query(
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI, mProjection, null, null,
+                MediaStore.Video.VideoColumns.DATE_TAKEN + " DESC");
+        if ( cc != null && cc.moveToFirst() ) {
+            vidIDs = new String[cc.getCount()];
+            // projedeme vsechna videa a vytahneme z nich ID
+            for (int i = 0; i < cc.getCount(); i++) {
+                cc.moveToPosition(i);
+                vidIDs[i] = cc.getString(0);
+            }
+        }
+        else {
+            Log.v("NO_VIDEO","No videos found");
         }
     }
 
@@ -331,10 +341,14 @@ public class ImageGallery extends FragmentActivity implements
      * Adapter pro zobrazovani bitmap v gridview
      */
     public class ImageAdapter extends BaseAdapter {
+
+        private Long flag = 0L;
+
         private Context mContext;
 
-        public ImageAdapter(Context c) {
+        public ImageAdapter(Context c, Long flag) {
             mContext = c;
+            this.flag = flag;
         }
 
         public int getCount() {
@@ -391,13 +405,12 @@ public class ImageGallery extends FragmentActivity implements
                 imageView.setImageBitmap(bitmap);
             } else {
                 if (cancelPotentialWork(bmpId, imageView)) {
-                    // TODO: Sem prijde novy placeholder az bude k dispozici
                     Bitmap mPlaceHolder = BitmapFactory.decodeResource(getResources(), R.drawable.graypix);
                     final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
                     final AsyncDrawable asyncDrawable =
                             new AsyncDrawable(getResources(), mPlaceHolder, task);
                     imageView.setImageDrawable(asyncDrawable);
-                    task.execute(bmpId);
+                    task.execute(bmpId, flag);
                 }
             }
         }
@@ -479,9 +492,17 @@ public class ImageGallery extends FragmentActivity implements
             @Override
             protected Bitmap doInBackground(Long... params) {
                 data = params[0];
+                long flag = params[1];
+                final Bitmap bitmap;
                 // Micro thumbnail k obrazku z MediaStore
-                final Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(mContext.getContentResolver(),
-                        data, MediaStore.Images.Thumbnails.MICRO_KIND, null);
+                if (flag == 0) {
+                    bitmap = MediaStore.Images.Thumbnails.getThumbnail(mContext.getContentResolver(),
+                            data, MediaStore.Images.Thumbnails.MICRO_KIND, null);
+                }
+                else {
+                    bitmap = MediaStore.Video.Thumbnails.getThumbnail(mContext.getContentResolver(),
+                            data, MediaStore.Video.Thumbnails.MICRO_KIND, null);
+                }
                 // vlozime bitmapu do cache pro dalsi pouziti
                 addBitmapToMemoryCache(String.valueOf(params[0]), bitmap);
                 return bitmap;
@@ -578,18 +599,24 @@ public class ImageGallery extends FragmentActivity implements
 
           */
         selIDs.clear();
-        GridView gridview = (GridView) findViewById(R.id.gridview);
-        ImageAdapter adapter = (ImageAdapter) gridview.getAdapter();
         if (position == 0) {
+            // fotky
             mIDs = imgIDs;
-            adapter.notifyDataSetChanged();
+            gridview.setAdapter(imageAdapter);
+            //imageAdapter.notifyDataSetChanged();
+        } else if (position == 1) {
+            // videa
+            mIDs = vidIDs;
+            gridview.setAdapter(videoAdapter);
+            //videoAdapter.notifyDataSetChanged();
         } else if (position == 2) {
+            // nedavne fotky
             mIDs = recIDs;
             for (int i = 0; i < mIDs.length; i++)
                 selIDs.add(Long.parseLong(mIDs[i]));
-            adapter.notifyDataSetChanged();
+            gridview.setAdapter(imageAdapter);
+            //imageAdapter.notifyDataSetChanged();
         }
-        //Toast.makeText(ImageGallery.this, String.valueOf(position) ,Toast.LENGTH_SHORT).show();
         return true;
     }
 

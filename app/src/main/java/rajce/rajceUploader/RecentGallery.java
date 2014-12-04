@@ -10,7 +10,6 @@ public class RecentGallery extends ImageGallery {
 
     //@Override
     public void onCreate(Bundle savedInstanceState) {
-        super.setRecentFlg(true);
         super.setLayout(R.layout.activity_recent_gallery);
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.activity_recent_gallery);
