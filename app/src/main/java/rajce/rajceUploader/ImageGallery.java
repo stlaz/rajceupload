@@ -352,7 +352,7 @@ public class ImageGallery extends FragmentActivity implements
         }
 
         public int getCount() {
-            return mIDs.length;
+            return mIDs == null ? 0 : mIDs.length;
         }
 
         public Object getItem(int position) {

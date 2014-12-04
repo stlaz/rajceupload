@@ -5,6 +5,7 @@ import android.app.ListActivity;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -13,17 +14,25 @@ import android.view.MenuItem;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import rajce.rajceUploader.XML.AlbumListResponse;
+import rajce.rajceUploader.network.info.APIStateGetAlbumList;
+
 
 public class OldNewDialog extends ListActivity {
     ListView listView, listView2;
 
-    String[] itemname ={
+    //private Handler mHandler;
+
+    //private AlbumListResponse existingAlbumsList;
+
+    private String[] itemname= {
             "Vytvořit nové album",
             "Chorvatsko 2014",
             "Chorvatsko 2013",
-            "Chorvatsko 2012",
+            "Chorvatsko 2012"
     };
-    Integer[] imgid={
+
+    private Integer[] imgid={
             R.drawable.ic_launcher,
             R.drawable.ic_launcher,
             R.drawable.ic_launcher,
@@ -37,6 +46,35 @@ public class OldNewDialog extends ListActivity {
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setIcon(new ColorDrawable(getResources().getColor(android.R.color.transparent)));
+
+
+        //mHandler = new Handler();
+
+        //RajceAPI api = RajceAPI.getInstance();
+
+        /*
+        api.getAlbumList(new APIStateGetAlbumList() {
+            @Override
+            public void setAlbumList(AlbumListResponse albumList) {
+                existingAlbumsList = albumList;
+            }
+
+            @Override
+            public void error(String error) {
+
+            }
+
+            @Override
+            public void finish() {
+                itemname = new String[existingAlbumsList.totalCount];
+                for (int i=0;i<existingAlbumsList.totalCount;i++)
+                {
+                    itemname[i] = existingAlbumsList.albums.get(i).albumName;
+                }
+            }
+        },mHandler);
+
+*/
 
         CustomListAdapter adapter=new CustomListAdapter(this, itemname, imgid);
         setListAdapter(adapter);
