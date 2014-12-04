@@ -1,5 +1,7 @@
 package rajce.rajceUploader.XML;
 
+import android.graphics.Bitmap;
+
 import java.util.ArrayList;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
@@ -68,7 +70,9 @@ public class AlbumListResponse extends Error {
         public int isFavourite;        
     
         @Element(required=false)
-        public int coverPhotoID;        
+        public int coverPhotoID;
+
+        public Bitmap coverPhoto;
             
         public Album() {
             super();

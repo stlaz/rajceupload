@@ -3,6 +3,7 @@ package rajce.rajceUploader;
 import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -37,12 +38,7 @@ public class OldNewDialog extends ListActivity {
     private String[] describe;
     private boolean[] downloaded;
 
-    private Integer[] imgid={
-            R.drawable.ic_launcher,
-            R.drawable.ic_launcher,
-            R.drawable.ic_launcher,
-            R.drawable.ic_launcher
-    };
+    private Bitmap[] covers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +61,7 @@ public class OldNewDialog extends ListActivity {
                 itemname = new String[initAlbumsList.totalCount + 1];
                 describe = new String[initAlbumsList.totalCount + 1];
                 downloaded = new boolean[initAlbumsList.totalCount + 1];
+                covers = new Bitmap[initAlbumsList.totalCount + 1];
                 itemname[0] = "Vytvořit nové album";
                 downloaded[0] = true;
                 for (int i = 1; i < (initAlbumsList.totalCount + 1); i++) {
@@ -72,15 +69,17 @@ public class OldNewDialog extends ListActivity {
                         downloaded[i] = true;
                         itemname[i] = initAlbumsList.albums.get(i - 1).albumName;
                         describe[i] = "Fotek " + initAlbumsList.albums.get(i - 1).photoCount + " videí "+ initAlbumsList.albums.get(i - 1).videoCount;
+                        covers[i] = initAlbumsList.albums.get(i - 1).coverPhoto;
                     } else {
                         itemname[i] = "Načítám album";
                         downloaded[i] = false;
+                        covers[i] = null;
                     }
 
 
                 }
 
-                CustomListAdapter adapter=new CustomListAdapter(OldNewDialog.this, itemname, describe, downloaded, imgid, mHandler);
+                CustomListAdapter adapter=new CustomListAdapter(OldNewDialog.this, itemname, describe, downloaded, covers, mHandler);
                 OldNewDialog.this.setListAdapter(adapter);
 
             }

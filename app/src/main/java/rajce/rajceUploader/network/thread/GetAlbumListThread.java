@@ -6,10 +6,18 @@
 
 package rajce.rajceUploader.network.thread;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.os.Handler;
+import android.util.Log;
 
+import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.URL;
+import java.net.URLConnection;
+
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 import rajce.rajceUploader.RajceAPI;
@@ -49,6 +57,20 @@ public class GetAlbumListThread extends Thread {
             serializer.write(new AlbumListRequest(token, skip, limit), sw);
             String result = rajceHttp.sendRequest(sw.toString());
             albumListResponse = serializer.read(AlbumListResponse.class, new StringReader( result ), false );
+
+            for (int i = 0; i < albumListResponse.albums.size(); i++) {
+                if (albumListResponse.albums.get(i).photoCount + albumListResponse.albums.get(i).videoCount == 0) {
+                    Log.e("TAG_THUMB", "SKIPPED (no photo or video)");
+                    continue;
+                }
+                URL url = new URL(albumListResponse.albums.get(i).thumbUrl);
+                URLConnection con = url.openConnection();
+                InputStream instr = con.getInputStream();
+                albumListResponse.albums.get(i).coverPhoto = BitmapFactory.decodeStream(instr);
+                instr.close();
+            }
+
+
             if (albumListResponse.errorCode == null) {
                 rajceAPI.setSessionToken(albumListResponse.sessionToken);
                 mHandler.post(new Runnable() {
