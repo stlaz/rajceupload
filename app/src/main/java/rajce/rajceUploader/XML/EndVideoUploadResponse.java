@@ -9,13 +9,13 @@ import org.simpleframework.xml.Attribute;
 @Root(name="response")
 public class EndVideoUploadResponse extends Error {
     
-    @Element
+    @Element(required=false)
     public String sessionToken;
     
-    @Element
+    @Element(required=false)
     public int photoID;
     
-    @ElementList(entry="block")
+    @ElementList(entry="block", required=false)
     public ArrayList<Block> blocks = new ArrayList<Block>(); 
     
     public static class Block {

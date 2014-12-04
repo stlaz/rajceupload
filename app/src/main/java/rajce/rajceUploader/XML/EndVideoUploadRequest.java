@@ -51,9 +51,9 @@ public class EndVideoUploadRequest {
         public VideoInfo videoInfo;
         
         public static class VideoInfo {
-            @Element
+            @Element(required=false)
             public String name;
-            @Element
+            @Element(required=false)
             public String description;
             @Element
             public int fileSizeOriginal;
@@ -65,55 +65,55 @@ public class EndVideoUploadRequest {
             public int sourceWidth;
             @Element
             public int sourceHeight;
-            @Element
+            @Element(required=false)
             public String cameraMake;
-            @Element
+            @Element(required=false)
             public String cameraModel;
-            @Element
+            @Element(required=false)
             public String gps;
-            @Element
+            @Element(required=false)
             public String rotate;
-            @Element
+            @Element(required=false)
             public String fullFileName;
-            @Element
+            @Element(required=false)
             public String dateTime;
-            @Element
+            @Element(required=false)
             public String vcodec;
-            @Element
+            @Element(required=false)
             public String vcodecSrc;
-            @Element
+            @Element(required=false)
             public String colorSpace;
-            @Element
+            @Element(required=false)
             public String duration;
-            @Element
+            @Element(required=false)
             public String durationSrc;
-            @Element
+            @Element(required=false)
             public String begin;
-            @Element
+            @Element(required=false)
             public String end;
-            @Element
+            @Element(required=false)
             public String thumbpos;
-            @Element
+            @Element(required=false)
             public String framerate;
-            @Element
+            @Element(required=false)
             public String framerateSrc;
             @Element
             public int vbitrate;
             @Element
             public int vbitrateSrc;
-            @Element
+            @Element(required=false)
             public String acodec;
-            @Element
+            @Element(required=false)
             public String acodecSrc;
-            @Element
+            @Element(required=false)
             public int asamplingRate;
-            @Element
+            @Element(required=false)
             public int asamplingRateSrc;
-            @Element
+            @Element(required=false)
             public int achannelCount;
-            @Element
+            @Element(required=false)
             public int abitrate;
-            @Element
+            @Element(required=false)
             public int abitrateSrc;
         }
         

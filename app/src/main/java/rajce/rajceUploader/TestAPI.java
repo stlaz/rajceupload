@@ -14,7 +14,7 @@ public class TestAPI extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test_api);
         TextView t = (TextView) findViewById(R.id.textDebug);
-        RajceAPI.testAPI(t);
+        //RajceAPI.testAPI(t);
     }
 
 

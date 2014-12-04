@@ -1,3 +1,9 @@
+/**
+ * Nazev: UploadPhotosThread.java
+ * Autor: Tomas Kunovsky
+ * Popis: Vlakno pro upload libovolneho poctu fotografii do zadaneho alba prihlaseneho uzivatele.
+ */
+
 package rajce.rajceUploader.network.thread;
 
 import java.io.StringReader;
@@ -14,114 +20,28 @@ import rajce.rajceUploader.XML.OpenAlbumResponse;
 import rajce.rajceUploader.XML.AddPhotoRequest;
 import rajce.rajceUploader.XML.AddPhotoResponse;
 import rajce.rajceUploader.network.RajceHttp;
-import rajce.rajceUploader.network.RajceHttp.StateUpload;
+import rajce.rajceUploader.network.RajceHttp.StatePhotoUpload;
 import rajce.rajceUploader.network.info.APIStateUpload;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
+import android.os.Handler;
 
-public class UploadPhotosThread  extends Thread  {
+public class UploadPhotosThread  extends UploadThread  {
     private String albumToken;
-    private int albumID;
-    private RajceAPI rajceAPI;
-    private APIStateUpload stat;        
-    private String token;
-    private RajceHttp rajceHttp;
-    private String result;
     private ArrayList<Photo> photos;
-
-    private static class StateUploads implements StateUpload {
-        private int counterUploaded;
-        private int count;
-        private RajceAPI rajceAPI;
-        private APIStateUpload stat;
-        private class UIThread implements Runnable {
-            private int newStat;
-            private APIStateUpload stat;
-            public UIThread(int newStat, APIStateUpload stat) {
-                this.newStat = newStat;
-                this.stat = stat;
-            }
-            public void run() {
-                stat.changeStat(newStat);
-            }
-        }
-        public StateUploads(int count, APIStateUpload stat, RajceAPI rajceAPI) {
-            counterUploaded = 0;
-            this.count = count;
-            this.stat = stat;
-            this.rajceAPI = rajceAPI;
-        }
-
-        public void incUploaded() {
-            counterUploaded++;
-        }
-
-        @Override
-        synchronized public void changeStat(int newStat) {
-            rajceAPI.mHandler.post(new UIThread((counterUploaded*100 + newStat) / count, stat ));
-        }
-    }
+    private Handler mHandler;
     
-    public UploadPhotosThread(int albumID, RajceAPI rajceAPI, String token, APIStateUpload stat, ArrayList<Photo> photos) {
-        super();
-        this.rajceAPI = rajceAPI;
-        this.token = token;
-        this.stat = stat;
-        this.rajceHttp = new RajceHttp(); 
-        this.albumID = albumID;
+    public UploadPhotosThread(int albumID, RajceAPI rajceAPI, String token, APIStateUpload stat, ArrayList<Photo> photos, Handler mHandler) {
+        super(albumID, rajceAPI, token, stat);
         this.photos = photos;
-    }
-    
-    private String openAlbum(int albumID) {
-        Serializer serializer = new Persister();
-        
-        try {
-            StringWriter sw = new StringWriter();
-            serializer.write(new OpenAlbumRequest(token, albumID), sw);
-            String result = rajceHttp.sendRequest(sw.toString());
-            OpenAlbumResponse openAlbumResponse = serializer.read(OpenAlbumResponse.class, new StringReader( result ), false );
-            if (openAlbumResponse.errorCode == null) {
-                rajceAPI.setSessionToken(openAlbumResponse.sessionToken);
-                this.token = openAlbumResponse.sessionToken;
-                return openAlbumResponse.albumToken;
-            } else {
-                this.result = openAlbumResponse.result;
-                return null;
-            }
-        } catch (Exception e) {
-            this.result = e.toString();
-            return null;
-        }    
-    }
-    
-    private int closeAlbum(String albumToken) {
-        Serializer serializer = new Persister();
-        
-        try {
-            StringWriter sw = new StringWriter();
-            serializer.write(new CloseAlbumRequest(token, albumToken), sw);
-            String result = rajceHttp.sendRequest(sw.toString());
-            
-            CloseAlbumResponse closeAlbumResponse = serializer.read(CloseAlbumResponse.class, new StringReader( result ), false );
-            if (closeAlbumResponse.errorCode == null) {
-                rajceAPI.setSessionToken(closeAlbumResponse.sessionToken);
-                this.token = closeAlbumResponse.sessionToken;
-                return 0;
-            } else {
-                this.result = closeAlbumResponse.result;
-                return 1;
-            }
-        } catch (Exception e) {
-            this.result = e.toString();
-            return 2;
-        }    
+        this.mHandler = mHandler;
     }
     
     @Override
     public void run() {
         albumToken = openAlbum(albumID);
         if (albumToken == null) {
-            rajceAPI.mHandler.post(new Runnable() {
+            mHandler.post(new Runnable() {
                 public void run()
                 {
                     stat.error(result);
@@ -129,7 +49,7 @@ public class UploadPhotosThread  extends Thread  {
             });
         } else {
             if (uploadPhotos() != 0 || closeAlbum(albumToken) != 0) {
-                rajceAPI.mHandler.post(new Runnable() {
+                mHandler.post(new Runnable() {
                     public void run()
                     {
                         stat.error(result);
@@ -137,7 +57,7 @@ public class UploadPhotosThread  extends Thread  {
                 });
             } else {
                 rajceAPI.setSessionToken(this.token);
-                rajceAPI.mHandler.post(new Runnable() {
+                mHandler.post(new Runnable() {
                     public void run()
                     {
                         stat.finish();
@@ -146,10 +66,14 @@ public class UploadPhotosThread  extends Thread  {
             } 
         }
     }
-    
+
+    /**
+     * Provede upload fotografii.
+     * @return 0 pokud vse probehne v poradku
+     */
     public int uploadPhotos() {
         Serializer serializer = new Persister();
-        StateUploads stateUploads = new StateUploads(photos.size(), this.stat, rajceAPI);
+        StateUploadPhotos stateUploads = new StateUploadPhotos(photos.size(), this.stat, rajceAPI, mHandler);
         try {
             for (int i = 0; i < photos.size(); i++) {
                 Bitmap image = BitmapFactory.decodeFile(photos.get(i).fullFileName);

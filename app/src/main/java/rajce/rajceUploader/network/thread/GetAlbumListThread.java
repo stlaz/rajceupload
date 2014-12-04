@@ -1,4 +1,12 @@
+/**
+ * Nazev: GetAlbumListThread.java
+ * Autor: Tomas Kunovsky
+ * Popis: Vlakno pro ziskani seznamu alb prihlaseneho uzivatele.
+ */
+
 package rajce.rajceUploader.network.thread;
+
+import android.os.Handler;
 
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -17,13 +25,15 @@ public class GetAlbumListThread extends Thread {
     private RajceHttp rajceHttp;
     private AlbumListResponse albumListResponse;
     private String errorText;
+    private Handler mHandler;
     
-    public GetAlbumListThread(RajceAPI rajceAPI, String token, APIStateGetAlbumList stat) {
+    public GetAlbumListThread(RajceAPI rajceAPI, String token, APIStateGetAlbumList stat, Handler mHandler) {
         super();
         this.rajceAPI = rajceAPI;
         this.token = token;
         this.stat = stat;
         this.rajceHttp = new RajceHttp();
+        this.mHandler = mHandler;
     }
     
     @Override
@@ -37,7 +47,7 @@ public class GetAlbumListThread extends Thread {
             albumListResponse = serializer.read(AlbumListResponse.class, new StringReader( result ), false );
             if (albumListResponse.errorCode == null) {
                 rajceAPI.setSessionToken(albumListResponse.sessionToken);
-                rajceAPI.mHandler.post(new Runnable() {
+                mHandler.post(new Runnable() {
                     public void run()
                     {
                         stat.finish();
@@ -45,7 +55,7 @@ public class GetAlbumListThread extends Thread {
                     }
                 });
             } else {
-                rajceAPI.mHandler.post(new Runnable() {
+                mHandler.post(new Runnable() {
                     public void run()
                     {
                         stat.error(albumListResponse.result);
@@ -54,7 +64,7 @@ public class GetAlbumListThread extends Thread {
             }
         } catch (Exception e) {
             errorText = e.toString();
-            rajceAPI.mHandler.post(new Runnable() {
+            mHandler.post(new Runnable() {
                 public void run()
                 {
                     stat.error(errorText);
