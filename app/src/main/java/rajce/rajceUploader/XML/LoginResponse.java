@@ -6,19 +6,19 @@ import org.simpleframework.xml.Root;
 @Root(name="response")
 public class LoginResponse extends Error {
     
-    @Element
+    @Element(required=false)
     public String sessionToken;
     
-    @Element
+    @Element(required=false)
     public int maxWidth;
     
-    @Element
+    @Element(required=false)
     public int maxHeight;
     
-    @Element
+    @Element(required=false)
     public int quality;
     
-    @Element
+    @Element(required=false)
     public String nick;
     
     public LoginResponse() {

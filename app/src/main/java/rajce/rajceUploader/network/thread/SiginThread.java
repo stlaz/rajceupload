@@ -58,7 +58,7 @@ public class SiginThread extends Thread {
                     }
                 });
             } else {
-                errorText = loginResponse.result;
+                errorText = loginResponse.errorCode;
                 mHandler.post(new Runnable() {
                     public void run()
                     {
@@ -67,7 +67,7 @@ public class SiginThread extends Thread {
                 });
             }
         } catch (Exception e) {
-            errorText = Arrays.toString(e.getStackTrace());
+            errorText = "-1";
             mHandler.post(new Runnable() {
                 public void run()
                 {

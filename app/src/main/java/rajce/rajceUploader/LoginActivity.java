@@ -4,6 +4,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -16,6 +18,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -24,6 +27,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -42,9 +46,6 @@ import rajce.rajceUploader.network.info.APIState;
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends Activity {
-
-
-
     /**
      * A dummy authentication store containing known user names and passwords.
      * TODO: remove after connecting to a real authentication system.
@@ -63,6 +64,9 @@ public class LoginActivity extends Activity {
      * Keep track of the login task to ensure we can cancel it if requested.
      */
 
+    public final Handler mHandler = new Handler();
+
+
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
@@ -70,47 +74,39 @@ public class LoginActivity extends Activity {
     private View mLoginFormView;
     private String password;
     private String email;
-    public final Handler mHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // pripravime shared preferences pro nacteni/ulozeni hesla
-        final SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        SharedPreferences.Editor editor = settings.edit();
-        /*editor.remove("pEmail");
-        editor.remove("pPasswd");
-        editor.commit();*/
-        final String pEmail = settings.getString("pEmail", null);
-        final String pPasswd = settings.getString("pPasswd", null);
+        RajceAPI api = RajceAPI.getInstance();
+        if (api.isLogin()) {
+            startGallery();
+        } else {
+            // pripravime shared preferences pro nacteni/ulozeni hesla
+            final SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+            SharedPreferences.Editor editor = settings.edit();
+            final String pEmail = settings.getString("pEmail", null);
+            final String pPasswd = settings.getString("pPasswd", null);
 
-        if (pEmail != null && pPasswd != null) {
-            RajceAPI api = RajceAPI.getInstance();
-            if (!api.isLogin()) {
+            if (pEmail != null && pPasswd != null) {
                 Log.e("pEmail", decrypt(pEmail));
                 Log.e("pPasswd", decrypt(pPasswd));
                 // oboje ulozene, muzeme se autentizovat podle nich
                 api.sigin(decrypt(pEmail), decrypt(pPasswd), new APIState() {
                     public void error(String error) {
-                        Log.e("LoginTAG", error);
                     }
 
                     public void finish() {
-                        Log.e("LoginTAG", "Test login: OK.");
                         startGallery();
                     }
                 }, mHandler);
-                if (api.isLogin()) {
-                    startGallery();
-                };
             }
         }
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -185,20 +181,25 @@ public class LoginActivity extends Activity {
             if (!api.isLogin()) {
                 api.sigin(email, password, new APIState() {
                     public void error(String error) {
-                        Log.e("LoginTAG", error);
                         showProgress(false);
-                        mPasswordView.setError(getString(R.string.error_incorrect_password));
-                        mPasswordView.requestFocus();
+                        if (error.equals("-1")) {
+                            Toast toast= Toast.makeText(getApplicationContext(),
+                                    "Server je nedostupný", Toast.LENGTH_SHORT);
+                            toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
+                            toast.show();
+
+                        } else {
+                            mPasswordView.setError(getString(R.string.error_incorrect_password));
+                            mPasswordView.requestFocus();
+                        }
                     }
 
                     public void finish() {
                         showProgress(false);
-                        Log.e("LoginTAG", "Test login: OK.");
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putString("pEmail", encrypt(email));
                         editor.putString("pPasswd", encrypt(password));
                         editor.commit();
-                        Log.e("LoginTAG", "Preferences updated.");
                         startGallery();
                     }
                 }, mHandler);
