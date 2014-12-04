@@ -3,39 +3,81 @@ package rajce.rajceUploader;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import rajce.rajceUploader.network.info.APIStateNewAlbum;
+import rajce.rajceUploader.network.info.APIStateUpload;
+
 
 public class NewAlbum extends Activity {
+    private EditText album_name;
+    private EditText album_descript;
     private Switch hiddenSwitch;
     private Switch passSwitch;
+    private Button submitButton;
+    private boolean isHidden;
+    private boolean usePass;
     private List<Long> selIDs;
+    private ArrayList<RajceAPI.Photo> photos = new ArrayList<RajceAPI.Photo>();;
+
+    private Cursor cc = null;
+    private String[] mProjection = { MediaStore.Images.Media.DATA };
+
+    private RajceAPI api;
+    private Handler mHandler = new Handler();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_album);
 
+        api = RajceAPI.getInstance();
         selIDs = MediaSingleton.getInstance().getSelIDs();
         if(selIDs.contains(-1L))
             Log.e("Yayaya", "It works");
 
+        if(selIDs.contains(-1L)) {  // budeme uploadovat fotky
+            for(Long elem : selIDs) {
+                if(elem == -1) continue;
+                String fullPath = null;
+                cc = null;
+                cc = this.getContentResolver().query(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, mProjection,
+                        MediaStore.Images.ImageColumns._ID + " = '" + Long.toString(elem) + "'", null,
+                        null);
+
+                if ( cc != null && cc.moveToFirst() ) {
+                    fullPath = cc.getString(0);
+                    photos.add(new RajceAPI.Photo(fullPath));
+                }
+                Log.e("Mame uz", Boolean.toString(fullPath == null));
+            }
+        }
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setIcon(new ColorDrawable(getResources().getColor(android.R.color.transparent)));
 
+        album_name = (EditText) findViewById(R.id.new_name);
+        album_descript = (EditText) findViewById(R.id.descript);
         hiddenSwitch = (Switch) findViewById(R.id.switch1);
         passSwitch = (Switch) findViewById(R.id.switch2);
+        submitButton = (Button) findViewById(R.id.new_album_submit);
 
         final EditText passLogin = (EditText) findViewById(R.id.pass_name);
         final EditText passPass = (EditText) findViewById(R.id.pass_pass);
@@ -43,8 +85,7 @@ public class NewAlbum extends Activity {
         hiddenSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if(b);
-                else;
+                isHidden = b;
             }
         });
         passSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -58,6 +99,59 @@ public class NewAlbum extends Activity {
                     passLogin.setVisibility(View.GONE);
                     passPass.setVisibility(View.GONE);
                 }
+                usePass = b;
+            }
+        });
+
+        submitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                submitButton.setEnabled(false);
+                api.newAlbumAdvanced(new APIStateNewAlbum() {
+                    @Override
+                    public void setAlbumID(int id) {
+
+                        if(selIDs.contains(-1L)) { // nahravame fotky
+                            api.uploadPhotos(id, new APIStateUpload() {
+                                @Override
+                                public void changeStat(int newStat) {
+
+                                }
+
+                                @Override
+                                public void error(String error) {
+
+                                }
+
+                                @Override
+                                public void finish() {
+                                    Toast.makeText(getApplicationContext(), "Fotografie byly úspěšně nahrány", Toast.LENGTH_SHORT);
+                                }
+                            },  photos,
+                                mHandler
+                            );
+
+                        }
+                    }
+
+                    @Override
+                    public void error(String error) {
+
+                    }
+
+                    @Override
+                    public void finish() {
+
+                    }
+                },
+                   album_name.getText().toString(),
+                   album_descript.getText().toString(),
+                   isHidden,
+                   usePass,
+                   (usePass ? passLogin.getText().toString() : null),
+                   (usePass ? passPass.getText().toString() : null),
+                   mHandler
+                   );
             }
         });
     }
