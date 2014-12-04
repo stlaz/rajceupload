@@ -14,14 +14,22 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class NewAlbum extends Activity {
     private Switch hiddenSwitch;
     private Switch passSwitch;
+    private List<Long> selIDs;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_album);
+
+        selIDs = MediaSingleton.getInstance().getSelIDs();
+        if(selIDs.contains(-1L))
+            Log.e("Yayaya", "It works");
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setIcon(new ColorDrawable(getResources().getColor(android.R.color.transparent)));
