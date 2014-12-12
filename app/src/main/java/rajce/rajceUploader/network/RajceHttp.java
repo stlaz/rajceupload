@@ -82,6 +82,40 @@ public class RajceHttp {
         out.writeBytes("\r\n");
         out.writeBytes("--" + boundary + "\r\n");
     }
+
+    private void writeImage(String name, String filename, DataOutputStream out) throws Exception {
+        out.writeBytes("Content-Disposition: form-data; name=\"" + name +"\"; filename=\"" + filename + "\"\r\n");
+        out.writeBytes("Content-Type: image/jpeg\r\n");
+        out.writeBytes("\r\n");
+
+        File file = new File(filename);
+        FileInputStream fin = new FileInputStream(file);
+        long totalSize = file.length();
+        long bytesTransferred = 0;
+        int chunkSize = 1024*512;
+
+        while (bytesTransferred < totalSize) {
+            long nextChunkSize = totalSize - bytesTransferred;
+            if (nextChunkSize > chunkSize) {
+                nextChunkSize = chunkSize;
+            }
+            byte[] bytes = new byte[(int) nextChunkSize];
+            fin.read(bytes);
+            out.write(bytes);
+            out.flush();
+            bytesTransferred += nextChunkSize;
+            if (monitor) {
+                int newStat = (int) ((100 * bytesTransferred) / totalSize);
+                stat.changeStat(newStat);
+            }
+        }
+        if (fin != null) {
+            fin.close();
+        }
+
+        out.writeBytes("\r\n");
+        out.writeBytes("--" + boundary + "\r\n");
+    }
     
     private void writeXML(String xml, DataOutputStream out) throws Exception {
         out.writeBytes("Content-Disposition: form-data; name=\"data\"\r\n");
@@ -100,7 +134,7 @@ public class RajceHttp {
      * @param stat rozhrani pro zasilani informaci o stavu uploadu
      * @return odpoved (XML) od serveru
      */
-    public String sendPhoto(String xml, Bitmap image, Bitmap thumb, RajceAPI.Photo photo, StatePhotoUpload stat) throws Exception  {
+    public String sendPhoto(String xml, Bitmap thumb, RajceAPI.Photo photo, StatePhotoUpload stat) throws Exception  {
         this.stat = stat;
         URL url = new URL(rajceAPIUrl);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -114,7 +148,7 @@ public class RajceHttp {
         monitor = false; //rika, zda ma informovat o stavu nahravani
         writeImage(thumb, "thumb", photo.fullFileName, dataStream);
         monitor = true;
-        writeImage(image, "photo", photo.fullFileName, dataStream);
+        writeImage("photo", photo.fullFileName, dataStream);
         monitor = false;
         writeXML(xml, dataStream);
         dataStream.flush();
@@ -188,7 +222,6 @@ public class RajceHttp {
         out.writeBytes("Content-Disposition: form-data; name=\"" + name +"\"; filename=\"" + filename + "\"\r\n");
         out.writeBytes("Content-Type: application/octet-stream\r\n");
         out.writeBytes("\r\n");
-        ByteArrayOutputStream bas = new ByteArrayOutputStream();
         out.write(block);
         out.writeBytes("\r\n");
         out.writeBytes("--" + boundary + "\r\n");
