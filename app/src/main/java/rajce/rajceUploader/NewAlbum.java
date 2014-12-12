@@ -1,5 +1,7 @@
 package rajce.rajceUploader;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -11,6 +13,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
@@ -23,6 +26,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -47,6 +51,9 @@ public class NewAlbum extends Activity {
     private Cursor cc = null;
     private String[] mProjectionImages = { MediaStore.Images.Media.DATA };
     private String[] mProjectionVideos = { MediaStore.Video.Media.DATA };
+    private View uploadView;
+    private View formView;
+    private TextView percentage;
 
     private RajceAPI api;
     private Handler mHandler = new Handler();
@@ -54,6 +61,10 @@ public class NewAlbum extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_album);
+
+        formView = findViewById(R.id.new_album);
+        uploadView = findViewById(R.id.upload_progress_view);
+        percentage = (TextView) findViewById(R.id.percentage);
 
         api = RajceAPI.getInstance();
         selIDs = MediaSingleton.getInstance().getSelIDs();
@@ -79,7 +90,7 @@ public class NewAlbum extends Activity {
         }
         else if(selIDs.contains(-2L)) {
             for(Long elem : selIDs) {
-                if(elem == -1) continue;
+                if(elem == -2) continue;
                 String fullPath = null;
                 cc = null;
                 cc = this.getContentResolver().query(
@@ -129,6 +140,9 @@ public class NewAlbum extends Activity {
             @Override
             public void onClick(View v) {
                 submitButton.setEnabled(false);
+                showProgress(true);
+                setTitle("Nahrávání");
+                percentage.setText("0%");
                 api.newAlbumAdvanced(new APIStateNewAlbum() {
                     @Override
                     public void setAlbumID(int id) {
@@ -137,6 +151,9 @@ public class NewAlbum extends Activity {
                             api.uploadPhotos(id, new APIStateUpload() {
                                 @Override
                                 public void changeStat(int newStat) {
+                                    percentage.setText(newStat + "%");
+                                    if(newStat == 100) percentage.setText("Nahrávání dokončeno");
+                                    // Dale nasleduje vytvoreni notifikace
                                     Context ctx = getApplicationContext();
                                     Intent notificationIntent = new Intent(ctx, NewAlbum.class);
                                     PendingIntent contentIntent = PendingIntent.getActivity(ctx,
@@ -156,8 +173,10 @@ public class NewAlbum extends Activity {
                                             .setAutoCancel(true)
                                             .setContentTitle("Rajče Uploader")
                                             .setContentText(newStat+"%");
-                                    Notification n = builder.build();
-
+                                    Notification n;
+                                    if(Build.VERSION.SDK_INT > 15)
+                                        n = builder.build();
+                                    else n = builder.getNotification();
                                     nm.notify(88, n);
                                 }
 
@@ -198,8 +217,10 @@ public class NewAlbum extends Activity {
                                             .setAutoCancel(true)
                                             .setContentTitle("Rajče Uploader")
                                             .setContentText(newStat+"%");
-                                    Notification n = builder.build();
-
+                                    Notification n;
+                                    if(Build.VERSION.SDK_INT > 15)
+                                        n = builder.build();
+                                    else n = builder.getNotification();
                                     nm.notify(88, n);
                                 }
 
@@ -304,4 +325,25 @@ public class NewAlbum extends Activity {
         ).start();
     }
 
+    private void showProgress(final boolean show) {
+        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+        formView.setVisibility(show ? View.GONE : View.VISIBLE);
+        formView.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                formView.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
+
+        uploadView.setVisibility(show ? View.VISIBLE : View.GONE);
+        uploadView.animate().setDuration(shortAnimTime).alpha(
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                uploadView.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        });
+    }
 }
