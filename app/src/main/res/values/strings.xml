@@ -18,6 +18,7 @@
     <string name="pass_protected">Album s heslem</string>
     <string name="album_login">Jméno</string>
     <string name="album_pass">Heslo</string>
+    <string name="go_back_home">Vrátit se do výběru fotek</string>
 
     <string-array name="oldnew">
         <item>Vytvořit nové album</item>

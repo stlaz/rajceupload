@@ -9,6 +9,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
@@ -68,8 +69,9 @@ public class NewAlbum extends Activity {
 
         api = RajceAPI.getInstance();
         selIDs = MediaSingleton.getInstance().getSelIDs();
-        if(selIDs.contains(-1L))
-            Log.e("Yayaya", "It works");
+        // the following is actually a hack, normally, when turning the screen
+        // android would kill this activity and brand new form would appear
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         if(selIDs.contains(-1L)) {  // budeme uploadovat fotky
             for(Long elem : selIDs) {
@@ -198,6 +200,9 @@ public class NewAlbum extends Activity {
                             api.uploadVideos(id, new APIStateUpload() {
                                 @Override
                                 public void changeStat(int newStat) {
+                                    percentage.setText(newStat + "%");
+                                    if(newStat == 100) percentage.setText("Nahrávání dokončeno");
+                                    // dále je tvorba notifikace nahravani videa
                                     Context ctx = getApplicationContext();
                                     Intent notificationIntent = new Intent(ctx, NewAlbum.class);
                                     PendingIntent contentIntent = PendingIntent.getActivity(ctx,
@@ -309,6 +314,7 @@ public class NewAlbum extends Activity {
                             // that takes time
                             try {
                                 // Sleep for 1 sec
+                                Log.e("Holly molly", "it actually gets here");
                                 Thread.sleep(1000);
                             } catch (InterruptedException e) {
                                 Log.d("NOTIF", "sleep failure");

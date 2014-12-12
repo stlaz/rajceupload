@@ -42,7 +42,8 @@
         </activity>
         <activity
             android:name="rajce.rajceUploader.NewAlbum"
-            android:label="@string/title_activity_new_album" >
+            android:label="@string/title_activity_new_album"
+            >
         </activity>
     </application>
 
