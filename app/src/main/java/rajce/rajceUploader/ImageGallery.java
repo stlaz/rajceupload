@@ -15,6 +15,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
@@ -377,7 +378,9 @@ public class ImageGallery extends FragmentActivity implements
 
                 imageView.setLayoutParams(new GridView.LayoutParams(viewWidth, viewWidth));
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                imageView.setCropToPadding(true);
+                if(Build.VERSION.SDK_INT > 15) { // following added in api 16
+                    imageView.setCropToPadding(true);
+                }
                 imageView.setPadding(viewBorder, viewBorder, viewBorder, viewBorder);
             } else {
                 imageView = (ImageView) convertView;
