@@ -25,6 +25,7 @@ import rajce.rajceUploader.network.info.APIStateUpload;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
 import android.os.Handler;
+import android.util.Log;
 
 public class UploadPhotosThread  extends UploadThread  {
     private String albumToken;
@@ -80,7 +81,8 @@ public class UploadPhotosThread  extends UploadThread  {
                 StringWriter sw = new StringWriter();
                 serializer.write(new AddPhotoRequest(token, image.getWidth(), image.getHeight(), albumToken, photos.get(i).photoName, photos.get(i).fullFileName, photos.get(i).description), sw);
                 Bitmap thumb =  Bitmap.createScaledBitmap (image, 100, 100, true);
-                String result = rajceHttp.sendPhoto(sw.toString(), image, thumb, photos.get(i), stateUploads);
+                image.recycle();
+                String result = rajceHttp.sendPhoto(sw.toString(), thumb, photos.get(i), stateUploads);
                 AddPhotoResponse addPhotoResponse = serializer.read(AddPhotoResponse.class, new StringReader( result), false );
                 if (addPhotoResponse.errorCode == null) {
                     this.token = addPhotoResponse.sessionToken;
