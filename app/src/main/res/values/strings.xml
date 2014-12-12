@@ -25,5 +25,6 @@
         <item>Přidat do stávajícího</item>
     </string-array>
 
+    <string name="title_activity_current_album">Album</string>
 
 </resources>

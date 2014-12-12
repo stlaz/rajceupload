@@ -38,26 +38,26 @@ import rajce.rajceUploader.network.info.APIStateUpload;
 
 
 public class NewAlbum extends Activity {
-    private EditText album_name;
-    private EditText album_descript;
-    private Switch hiddenSwitch;
-    private Switch passSwitch;
-    private Button submitButton;
-    private boolean isHidden;
-    private boolean usePass;
-    private List<Long> selIDs;
-    private ArrayList<RajceAPI.Photo> photos = new ArrayList<RajceAPI.Photo>();
-    private ArrayList<RajceAPI.Video> videos = new ArrayList<RajceAPI.Video>();
+    protected EditText album_name;
+    protected EditText album_descript;
+    protected Switch hiddenSwitch;
+    protected Switch passSwitch;
+    protected Button submitButton;
+    protected boolean isHidden;
+    protected boolean usePass;
+    protected List<Long> selIDs;
+    protected ArrayList<RajceAPI.Photo> photos = new ArrayList<RajceAPI.Photo>();
+    protected ArrayList<RajceAPI.Video> videos = new ArrayList<RajceAPI.Video>();
 
-    private Cursor cc = null;
-    private String[] mProjectionImages = { MediaStore.Images.Media.DATA };
-    private String[] mProjectionVideos = { MediaStore.Video.Media.DATA };
-    private View uploadView;
-    private View formView;
-    private TextView percentage;
+    protected Cursor cc = null;
+    protected String[] mProjectionImages = { MediaStore.Images.Media.DATA };
+    protected String[] mProjectionVideos = { MediaStore.Video.Media.DATA };
+    protected View uploadView;
+    protected View formView;
+    protected TextView percentage;
 
-    private RajceAPI api;
-    private Handler mHandler = new Handler();
+    protected RajceAPI api;
+    protected Handler mHandler = new Handler();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -180,7 +180,7 @@ public class NewAlbum extends Activity {
         });
     }
 
-    private void uploadPhotos(int albumid) {
+    protected void uploadPhotos(int albumid) {
         api.uploadPhotos(albumid, new APIStateUpload() {
                     @Override
                     public void changeStat(int newStat) {
@@ -227,7 +227,7 @@ public class NewAlbum extends Activity {
         );
     }
 
-    private void uploadVideos(int albumid) {
+    protected void uploadVideos(int albumid) {
         api.uploadVideos(albumid, new APIStateUpload() {
                     @Override
                     public void changeStat(int newStat) {
@@ -337,7 +337,7 @@ public class NewAlbum extends Activity {
         ).start();
     }
 
-    private void showProgress(final boolean show) {
+    protected void showProgress(final boolean show) {
         int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
         formView.setVisibility(show ? View.GONE : View.VISIBLE);
