@@ -77,11 +77,13 @@ public class UploadPhotosThread  extends UploadThread  {
         StateUploadPhotos stateUploads = new StateUploadPhotos(photos.size(), this.stat, rajceAPI, mHandler);
         try {
             for (int i = 0; i < photos.size(); i++) {
-                Bitmap image = BitmapFactory.decodeFile(photos.get(i).fullFileName);
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                Bitmap image = BitmapFactory.decodeFile(photos.get(i).fullFileName, options);
+                image = null;
                 StringWriter sw = new StringWriter();
-                serializer.write(new AddPhotoRequest(token, image.getWidth(), image.getHeight(), albumToken, photos.get(i).photoName, photos.get(i).fullFileName, photos.get(i).description), sw);
-                Bitmap thumb =  Bitmap.createScaledBitmap (image, 100, 100, true);
-                image.recycle();
+                serializer.write(new AddPhotoRequest(token, options.outWidth, options.outHeight, albumToken, photos.get(i).photoName, photos.get(i).fullFileName, photos.get(i).description), sw);
+                Bitmap thumb =  decodeSampledBitmap(photos.get(i).fullFileName, 100, 100);
                 String result = rajceHttp.sendPhoto(sw.toString(), thumb, photos.get(i), stateUploads);
                 AddPhotoResponse addPhotoResponse = serializer.read(AddPhotoResponse.class, new StringReader( result), false );
                 if (addPhotoResponse.errorCode == null) {
@@ -99,5 +101,47 @@ public class UploadPhotosThread  extends UploadThread  {
         }
         return 0;
     }
+
+    private Bitmap decodeSampledBitmap(String fullName, int reqWidth, int reqHeight) {
+
+        // First decode with inJustDecodeBounds=true to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(fullName, options);
+
+        // Calculate inSampleSize
+        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+        Bitmap sample0 =  BitmapFactory.decodeFile(fullName, options);
+        return Bitmap.createScaledBitmap (sample0, 100, 100, true);
+    }
+
+
+    private int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) > reqHeight
+                    && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
+    }
     
 }
+
+
