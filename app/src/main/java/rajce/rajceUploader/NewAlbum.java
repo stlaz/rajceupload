@@ -87,7 +87,6 @@ public class NewAlbum extends Activity {
                     fullPath = cc.getString(0);
                     photos.add(new RajceAPI.Photo(fullPath));
                 }
-                Log.e("Mame uz", Boolean.toString(fullPath == null));
             }
         }
         else if(selIDs.contains(-2L)) {
@@ -150,97 +149,11 @@ public class NewAlbum extends Activity {
                     public void setAlbumID(int id) {
 
                         if(selIDs.contains(-1L)) { // nahravame fotky
-                            api.uploadPhotos(id, new APIStateUpload() {
-                                @Override
-                                public void changeStat(int newStat) {
-                                    percentage.setText(newStat + "%");
-                                    if(newStat == 100) percentage.setText("Nahrávání dokončeno");
-                                    // Dale nasleduje vytvoreni notifikace
-                                    Context ctx = getApplicationContext();
-                                    Intent notificationIntent = new Intent(ctx, NewAlbum.class);
-                                    PendingIntent contentIntent = PendingIntent.getActivity(ctx,
-                                            1, notificationIntent,
-                                            PendingIntent.FLAG_CANCEL_CURRENT);
-
-                                    NotificationManager nm = (NotificationManager) ctx
-                                            .getSystemService(Context.NOTIFICATION_SERVICE);
-                                    Resources res = ctx.getResources();
-                                    Notification.Builder builder = new Notification.Builder(ctx);
-
-                                    builder.setContentIntent(contentIntent)
-                                            .setSmallIcon(R.drawable.ic_launcher)
-                                            .setLargeIcon(BitmapFactory.decodeResource(res, R.drawable.ic_launcher))
-                                            .setTicker("Nahrávám")
-                                            .setWhen(System.currentTimeMillis())
-                                            .setAutoCancel(true)
-                                            .setContentTitle("Rajče Uploader")
-                                            .setContentText(newStat+"%");
-                                    Notification n;
-                                    if(Build.VERSION.SDK_INT > 15)
-                                        n = builder.build();
-                                    else n = builder.getNotification();
-                                    nm.notify(88, n);
-                                }
-
-                                @Override
-                                public void error(String error) {
-
-                                }
-
-                                @Override
-                                public void finish() {
-                                    Toast.makeText(getApplicationContext(), "Fotografie byly úspěšně nahrány", Toast.LENGTH_SHORT);
-                                }
-                            },  photos,
-                                mHandler
-                            );
+                            uploadPhotos(id);
 
                         }
                         else if(selIDs.contains(-2L)) { // nahravame videa
-                            api.uploadVideos(id, new APIStateUpload() {
-                                @Override
-                                public void changeStat(int newStat) {
-                                    percentage.setText(newStat + "%");
-                                    if(newStat == 100) percentage.setText("Nahrávání dokončeno");
-                                    // dále je tvorba notifikace nahravani videa
-                                    Context ctx = getApplicationContext();
-                                    Intent notificationIntent = new Intent(ctx, NewAlbum.class);
-                                    PendingIntent contentIntent = PendingIntent.getActivity(ctx,
-                                            1, notificationIntent,
-                                            PendingIntent.FLAG_CANCEL_CURRENT);
-
-                                    NotificationManager nm = (NotificationManager) ctx
-                                            .getSystemService(Context.NOTIFICATION_SERVICE);
-                                    Resources res = ctx.getResources();
-                                    Notification.Builder builder = new Notification.Builder(ctx);
-
-                                    builder.setContentIntent(contentIntent)
-                                            .setSmallIcon(R.drawable.ic_launcher)
-                                            .setLargeIcon(BitmapFactory.decodeResource(res, R.drawable.ic_launcher))
-                                            .setTicker("Nahrávám")
-                                            .setWhen(System.currentTimeMillis())
-                                            .setAutoCancel(true)
-                                            .setContentTitle("Rajče Uploader")
-                                            .setContentText(newStat+"%");
-                                    Notification n;
-                                    if(Build.VERSION.SDK_INT > 15)
-                                        n = builder.build();
-                                    else n = builder.getNotification();
-                                    nm.notify(88, n);
-                                }
-
-                                @Override
-                                public void error(String error) {
-
-                                }
-
-                                @Override
-                                public void finish() {
-
-                                }
-                            },
-                            videos,
-                            mHandler);
+                            uploadVideos(id);
                         }
 
                     }
@@ -267,6 +180,99 @@ public class NewAlbum extends Activity {
         });
     }
 
+    private void uploadPhotos(int albumid) {
+        api.uploadPhotos(albumid, new APIStateUpload() {
+                    @Override
+                    public void changeStat(int newStat) {
+                        percentage.setText(newStat + "%");
+                        if(newStat == 100) percentage.setText("Nahrávání dokončeno");
+                        // Dale nasleduje vytvoreni notifikace
+                        Context ctx = getApplicationContext();
+                        Intent notificationIntent = new Intent(ctx, NewAlbum.class);
+                        PendingIntent contentIntent = PendingIntent.getActivity(ctx,
+                                1, notificationIntent,
+                                PendingIntent.FLAG_CANCEL_CURRENT);
+
+                        NotificationManager nm = (NotificationManager) ctx
+                                .getSystemService(Context.NOTIFICATION_SERVICE);
+                        Resources res = ctx.getResources();
+                        Notification.Builder builder = new Notification.Builder(ctx);
+
+                        builder.setContentIntent(contentIntent)
+                                .setSmallIcon(R.drawable.ic_launcher)
+                                .setLargeIcon(BitmapFactory.decodeResource(res, R.drawable.ic_launcher))
+                                .setTicker("Nahrávám")
+                                .setWhen(System.currentTimeMillis())
+                                .setAutoCancel(true)
+                                .setContentTitle("Rajče Uploader")
+                                .setContentText(newStat+"%");
+                        Notification n;
+                        if(Build.VERSION.SDK_INT > 15)
+                            n = builder.build();
+                        else n = builder.getNotification();
+                        nm.notify(88, n);
+                    }
+
+                    @Override
+                    public void error(String error) {
+
+                    }
+
+                    @Override
+                    public void finish() {
+                        Toast.makeText(getApplicationContext(), "Fotografie byly úspěšně nahrány", Toast.LENGTH_SHORT);
+                    }
+                },  photos,
+                mHandler
+        );
+    }
+
+    private void uploadVideos(int albumid) {
+        api.uploadVideos(albumid, new APIStateUpload() {
+                    @Override
+                    public void changeStat(int newStat) {
+                        percentage.setText(newStat + "%");
+                        if(newStat == 100) percentage.setText("Nahrávání dokončeno");
+                        // dále je tvorba notifikace nahravani videa
+                        Context ctx = getApplicationContext();
+                        Intent notificationIntent = new Intent(ctx, NewAlbum.class);
+                        PendingIntent contentIntent = PendingIntent.getActivity(ctx,
+                                1, notificationIntent,
+                                PendingIntent.FLAG_CANCEL_CURRENT);
+
+                        NotificationManager nm = (NotificationManager) ctx
+                                .getSystemService(Context.NOTIFICATION_SERVICE);
+                        Resources res = ctx.getResources();
+                        Notification.Builder builder = new Notification.Builder(ctx);
+
+                        builder.setContentIntent(contentIntent)
+                                .setSmallIcon(R.drawable.ic_launcher)
+                                .setLargeIcon(BitmapFactory.decodeResource(res, R.drawable.ic_launcher))
+                                .setTicker("Nahrávám")
+                                .setWhen(System.currentTimeMillis())
+                                .setAutoCancel(true)
+                                .setContentTitle("Rajče Uploader")
+                                .setContentText(newStat+"%");
+                        Notification n;
+                        if(Build.VERSION.SDK_INT > 15)
+                            n = builder.build();
+                        else n = builder.getNotification();
+                        nm.notify(88, n);
+                    }
+
+                    @Override
+                    public void error(String error) {
+
+                    }
+
+                    @Override
+                    public void finish() {
+
+                    }
+                },
+                videos,
+                mHandler);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
