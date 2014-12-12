@@ -80,6 +80,7 @@ public class LoginActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        setTitle(R.string.title_activity_login);
         RajceAPI api = RajceAPI.getInstance();
         if (api.isLogin()) {
             startGallery();
