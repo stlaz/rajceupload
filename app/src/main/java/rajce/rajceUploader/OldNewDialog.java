@@ -48,7 +48,7 @@ public class OldNewDialog extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_old_new_dialog);
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+//        getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setIcon(new ColorDrawable(getResources().getColor(android.R.color.transparent)));
 
 

@@ -26,7 +26,6 @@
             android:windowSoftInputMode="adjustResize|stateVisible" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -37,22 +36,11 @@
         </activity>
         <activity
             android:name="rajce.rajceUploader.OldNewDialog"
-            android:label="@string/title_activity_old_new_dialog"
-            android:parentActivityName="rajce.rajceUploader.ImageGallery" >
-
-            <!-- Podpora rodicovske aktivity pro Android 4.0 a nižší -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="rajce.rajceUploader.ImageGallery" />
+            android:label="@string/title_activity_old_new_dialog" >
         </activity>
         <activity
             android:name="rajce.rajceUploader.NewAlbum"
-            android:label="@string/title_activity_new_album"
-            android:parentActivityName="rajce.rajceUploader.OldNewDialog" >
-            <!-- Podpora rodicovske aktivity pro Android 4.0 a nižší -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="rajce.rajceUploader.OldNewDialog" />
+            android:label="@string/title_activity_new_album" >
         </activity>
     </application>
 

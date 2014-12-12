@@ -41,10 +41,12 @@ public class NewAlbum extends Activity {
     private boolean isHidden;
     private boolean usePass;
     private List<Long> selIDs;
-    private ArrayList<RajceAPI.Photo> photos = new ArrayList<RajceAPI.Photo>();;
+    private ArrayList<RajceAPI.Photo> photos = new ArrayList<RajceAPI.Photo>();
+    private ArrayList<RajceAPI.Video> videos = new ArrayList<RajceAPI.Video>();
 
     private Cursor cc = null;
-    private String[] mProjection = { MediaStore.Images.Media.DATA };
+    private String[] mProjectionImages = { MediaStore.Images.Media.DATA };
+    private String[] mProjectionVideos = { MediaStore.Video.Media.DATA };
 
     private RajceAPI api;
     private Handler mHandler = new Handler();
@@ -64,7 +66,7 @@ public class NewAlbum extends Activity {
                 String fullPath = null;
                 cc = null;
                 cc = this.getContentResolver().query(
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, mProjection,
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, mProjectionImages,
                         MediaStore.Images.ImageColumns._ID + " = '" + Long.toString(elem) + "'", null,
                         null);
 
@@ -75,7 +77,22 @@ public class NewAlbum extends Activity {
                 Log.e("Mame uz", Boolean.toString(fullPath == null));
             }
         }
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        else if(selIDs.contains(-2L)) {
+            for(Long elem : selIDs) {
+                if(elem == -1) continue;
+                String fullPath = null;
+                cc = null;
+                cc = this.getContentResolver().query(
+                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI, mProjectionVideos,
+                        MediaStore.Video.VideoColumns._ID + " = '" + Long.toString(elem) + "'", null,
+                        null);
+                if( cc != null && cc.moveToFirst() ) {
+                    fullPath =cc.getString(0);
+                    videos.add(new RajceAPI.Video(fullPath));
+                }
+            }
+        }
+//        getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setIcon(new ColorDrawable(getResources().getColor(android.R.color.transparent)));
 
         album_name = (EditText) findViewById(R.id.new_name);
@@ -158,6 +175,48 @@ public class NewAlbum extends Activity {
                             );
 
                         }
+                        else if(selIDs.contains(-2L)) { // nahravame videa
+                            api.uploadVideos(id, new APIStateUpload() {
+                                @Override
+                                public void changeStat(int newStat) {
+                                    Context ctx = getApplicationContext();
+                                    Intent notificationIntent = new Intent(ctx, NewAlbum.class);
+                                    PendingIntent contentIntent = PendingIntent.getActivity(ctx,
+                                            1, notificationIntent,
+                                            PendingIntent.FLAG_CANCEL_CURRENT);
+
+                                    NotificationManager nm = (NotificationManager) ctx
+                                            .getSystemService(Context.NOTIFICATION_SERVICE);
+                                    Resources res = ctx.getResources();
+                                    Notification.Builder builder = new Notification.Builder(ctx);
+
+                                    builder.setContentIntent(contentIntent)
+                                            .setSmallIcon(R.drawable.ic_launcher)
+                                            .setLargeIcon(BitmapFactory.decodeResource(res, R.drawable.ic_launcher))
+                                            .setTicker("Nahrávám")
+                                            .setWhen(System.currentTimeMillis())
+                                            .setAutoCancel(true)
+                                            .setContentTitle("Rajče Uploader")
+                                            .setContentText(newStat+"%");
+                                    Notification n = builder.build();
+
+                                    nm.notify(88, n);
+                                }
+
+                                @Override
+                                public void error(String error) {
+
+                                }
+
+                                @Override
+                                public void finish() {
+
+                                }
+                            },
+                            videos,
+                            mHandler);
+                        }
+
                     }
 
                     @Override
