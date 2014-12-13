@@ -21,6 +21,7 @@ public class CustomListAdapter extends ArrayAdapter<String> {
     private Activity context;
     private List<String> itemname;
     private List<String> describe;
+    private List<Integer> ids;
     private List<Bitmap> covers;
     private List<Boolean> downloaded;
     private AlbumListResponse alr;
@@ -30,12 +31,13 @@ public class CustomListAdapter extends ArrayAdapter<String> {
     private final int defaultCover = R.drawable.ic_launcher;
 
 
-    public CustomListAdapter(Activity context, List<String> itemname, List<String> describe, List<Boolean> downloaded, List<Bitmap> covers, Handler mHandler) {
+    public CustomListAdapter(Activity context, List<String> itemname, List<String> describe, List<Integer> ids, List<Boolean> downloaded, List<Bitmap> covers, Handler mHandler) {
         super(context, R.layout.list_item_album, itemname);
         this.mHandler = mHandler;
         this.mHandler = new Handler();
         this.itemname = itemname;
         this.describe = describe;
+        this.ids = ids;
         this.downloaded = downloaded;
         this.covers = covers;
 
@@ -50,6 +52,7 @@ public class CustomListAdapter extends ArrayAdapter<String> {
         private int pos;
         private List<String> itemname;
         private List<String> describe;
+        private List<Integer> ids;
         private ListActivity listActivity;
         private ArrayAdapter<String> adapter;
         private List<Bitmap> covers;
@@ -66,6 +69,7 @@ public class CustomListAdapter extends ArrayAdapter<String> {
         public void setAlbumList(AlbumListResponse albumList) {
             for (int i = 0; i < albumList.albums.size(); i++) {
                 itemname.set(i + pos,albumList.albums.get(i).albumName);
+                ids.set(i+pos,albumList.albums.get(i).id);
                 describe.set(i + pos,"Fotek " + albumList.albums.get(i).photoCount + " videí "+ albumList.albums.get(i).videoCount);
                 this.covers.set(i + pos, albumList.albums.get(i).coverPhoto);
             }
@@ -118,5 +122,5 @@ public class CustomListAdapter extends ArrayAdapter<String> {
         }
 
         return rowView;
-    };
+    }
 }

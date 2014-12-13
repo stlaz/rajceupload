@@ -89,7 +89,7 @@ public class NewAlbum extends Activity {
                 }
             }
         }
-        else if(selIDs.contains(-2L)) {
+        else if(selIDs.contains(-2L)) { // budeme uploadovat videa
             for(Long elem : selIDs) {
                 if(elem == -2) continue;
                 String fullPath = null;

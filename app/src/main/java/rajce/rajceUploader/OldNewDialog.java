@@ -39,6 +39,7 @@ public class OldNewDialog extends ListActivity {
 
     private String[] itemname;
     private String[] describe;
+    private Integer[] ids;
     private ArrayList<Boolean> downloaded;
 
     private Bitmap[] covers;
@@ -63,6 +64,7 @@ public class OldNewDialog extends ListActivity {
                 initAlbumsList = albumList;
                 itemname = new String[initAlbumsList.totalCount + 1];
                 describe = new String[initAlbumsList.totalCount + 1];
+                ids = new Integer[initAlbumsList.totalCount + 1];
                 downloaded = new ArrayList<Boolean>();
                 covers = new Bitmap[initAlbumsList.totalCount + 1];
                 itemname[0] = "Vytvořit nové album";
@@ -72,9 +74,11 @@ public class OldNewDialog extends ListActivity {
                         downloaded.add(true);
                         itemname[i] = initAlbumsList.albums.get(i - 1).albumName;
                         describe[i] = "Fotek " + initAlbumsList.albums.get(i - 1).photoCount + " videí "+ initAlbumsList.albums.get(i - 1).videoCount;
+                        ids[i] = initAlbumsList.albums.get(i - 1).id;
                         covers[i] = initAlbumsList.albums.get(i - 1).coverPhoto;
                     } else {
                         itemname[i] = "Načítám album";
+                        ids[i] = 0;
                         downloaded.add(false);
                         covers[i] = null;
                     }
@@ -84,6 +88,7 @@ public class OldNewDialog extends ListActivity {
 
                 List<String> names =  Collections.synchronizedList(new ArrayList<String>(Arrays.asList(itemname)));
                 List<String> describes =  Collections.synchronizedList(new ArrayList<String>(Arrays.asList(describe)));
+                List<Integer> id_s =  Collections.synchronizedList(new ArrayList<Integer>(Arrays.asList(ids)));
                 List<Boolean> downloadeds =  Collections.synchronizedList(new ArrayList<Boolean>(downloaded));
                 List<Bitmap> cover =  Collections.synchronizedList(new ArrayList<Bitmap>(Arrays.asList(covers)));
 
@@ -92,7 +97,7 @@ public class OldNewDialog extends ListActivity {
 
 
 
-                CustomListAdapter adapter=new CustomListAdapter(OldNewDialog.this, names, describes, downloadeds, cover, mHandler);
+                CustomListAdapter adapter=new CustomListAdapter(OldNewDialog.this, names, describes, id_s, downloadeds, cover, mHandler);
                 OldNewDialog.this.setListAdapter(adapter);
 
             }
@@ -121,8 +126,12 @@ public class OldNewDialog extends ListActivity {
             startActivity(i);
         }
         else {
-            String SelectedItem= (String)getListAdapter().getItem(position);
+            //String SelectedItem= (String)getListAdapter().getItem(position);
 //            Toast.makeText(this, SelectedItem, Toast.LENGTH_SHORT).show();
+            Intent i = new Intent(getApplicationContext(), CurrentAlbum.class);
+            i.putExtra("KEY_ALBUM_NAME",(String)getListAdapter().getItem(position));
+            i.putExtra("KEY_ALBUM_ID",ids[position]);
+            startActivity(i);
         }
 
     }
