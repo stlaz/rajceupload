@@ -19,13 +19,16 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -141,6 +144,9 @@ public class NewAlbum extends Activity {
             @Override
             public void onClick(View v) {
                 submitButton.setEnabled(false);
+                // hide keyboard
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
                 showProgress(true);
                 setTitle("Nahrávání");
                 percentage.setText("0%");
@@ -220,7 +226,7 @@ public class NewAlbum extends Activity {
 
                     @Override
                     public void finish() {
-                        Toast.makeText(getApplicationContext(), "Fotografie byly úspěšně nahrány", Toast.LENGTH_SHORT);
+                        backToGallery();
                     }
                 },  photos,
                 mHandler
@@ -267,7 +273,7 @@ public class NewAlbum extends Activity {
 
                     @Override
                     public void finish() {
-
+                        backToGallery();
                     }
                 },
                 videos,
@@ -296,45 +302,27 @@ public class NewAlbum extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void onSubmitClicked(View view) {
-        final int id = 1;
-        final NotificationManager mNotifyManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
-        // TODO: do titulku muzete hodit treba nazev alba
-        mBuilder.setContentTitle("Nahrávání do alba ...")
-                .setContentText("Probíhá nahrávání")
-                .setSmallIcon(R.drawable.ic_launcher);
-        // Start a lengthy operation in a background thread
-        new Thread(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        int incr;
-                        mBuilder.setProgress(0, 0, true);
-                        mNotifyManager.notify(id, mBuilder.build());
-                        // TODO: Misto foru hodit nahravani
-                        // Do the "lengthy" operation 10 times
-                        for (incr = 0; incr <= 50; incr+=5) {
-                            // Sleeps the thread, simulating an operation
-                            // that takes time
-                            try {
-                                // Sleep for 1 sec
-                                Log.e("Holly molly", "it actually gets here");
-                                Thread.sleep(1000);
-                            } catch (InterruptedException e) {
-                                Log.d("NOTIF", "sleep failure");
-                            }
-                        }
-                        // When the loop is finished, updates the notification
-                        mBuilder.setContentText("Nahrávání dokončeno")
-                                // Removes the progress bar
-                                .setProgress(0,0,false);
-                        mNotifyManager.notify(id, mBuilder.build());
-                    }
-                }
-        // Starts the thread by calling the run() method in its Runnable
-        ).start();
+    @Override
+    public void onBackPressed() {
+        if (formView.getVisibility() == View.VISIBLE) {
+            Intent i = new Intent(getApplicationContext(), OldNewDialog.class);
+            startActivity(i);
+            finish();
+        }
+        else {
+            backToGallery();
+        }
+    }
+
+    public void onBackButtonClicked(View view) {
+        backToGallery();
+    }
+
+    public void backToGallery() {
+        selIDs.clear();
+        Intent intent = new Intent("clearList");
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        finish();
     }
 
     protected void showProgress(final boolean show) {

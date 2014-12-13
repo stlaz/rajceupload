@@ -2,10 +2,12 @@ package rajce.rajceUploader;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -19,6 +21,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.LruCache;
@@ -81,6 +84,15 @@ public class ImageGallery extends FragmentActivity implements
     private int viewBorder;
     private int viewWidth;
 
+    private BroadcastReceiver clearListReciever = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Extract data included in the Intent
+            selIDs.clear();
+            imageAdapter.notifyDataSetChanged();
+        }
+    };
+
     private ImageAdapter imageAdapter = new ImageAdapter(this, 0L);
     private ImageAdapter videoAdapter = new ImageAdapter(this, 1L);
 
@@ -113,6 +125,8 @@ public class ImageGallery extends FragmentActivity implements
         final int cacheSize = maxMemory / 16;
 
         super.onCreate(savedInstanceState);
+        LocalBroadcastManager.getInstance(this).registerReceiver(clearListReciever,
+                new IntentFilter("clearList"));
         setContentView(R.layout.activity_img_gallery);
         gridview = (GridView) findViewById(R.id.gridview);
 
