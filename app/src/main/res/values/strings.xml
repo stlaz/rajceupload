@@ -25,6 +25,6 @@
         <item>Přidat do stávajícího</item>
     </string-array>
 
-    <string name="title_activity_current_album">\u00A0Přidat do alba</string>
+    <string name="title_activity_current_album">\u00A0Nahrávání do alba</string>
 
 </resources>

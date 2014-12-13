@@ -29,7 +29,6 @@ public class CurrentAlbum extends NewAlbum {
 
         submitButton.setEnabled(false);
         showProgress(true);
-        setTitle("Nahrávání");
         percentage.setText("0%");
 
         if(selIDs.contains(-1L)) { // nahravame fotky
@@ -39,27 +38,6 @@ public class CurrentAlbum extends NewAlbum {
         else if(selIDs.contains(-2L)) { // nahravame videa
             uploadVideos(album_id);
         }
-/*
-        submitButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                submitButton.setEnabled(false);
-                showProgress(true);
-                setTitle("Nahrávání");
-                percentage.setText("0%");
-
-                if(selIDs.contains(-1L)) { // nahravame fotky
-                    uploadPhotos(album_id);
-
-                }
-                else if(selIDs.contains(-2L)) { // nahravame videa
-                    uploadVideos(album_id);
-                }
-
-            }
-        });*/
-
-
 
     }
 

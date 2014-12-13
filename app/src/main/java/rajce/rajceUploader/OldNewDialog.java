@@ -124,6 +124,7 @@ public class OldNewDialog extends ListActivity {
         if (position==0) {
             Intent i = new Intent(getApplicationContext(), NewAlbum.class);
             startActivity(i);
+            finish();
         }
         else {
 
@@ -139,6 +140,7 @@ public class OldNewDialog extends ListActivity {
                             i.putExtra("KEY_ALBUM_NAME",(String)getListAdapter().getItem(position_));
                             i.putExtra("KEY_ALBUM_ID",ids[position_]);
                             startActivity(i);
+                            finish();
                         }})
                     .setNegativeButton("Zpět", null).show();
 

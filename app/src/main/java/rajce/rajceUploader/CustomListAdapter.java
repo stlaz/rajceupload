@@ -56,10 +56,11 @@ public class CustomListAdapter extends ArrayAdapter<String> {
         private ListActivity listActivity;
         private ArrayAdapter<String> adapter;
         private List<Bitmap> covers;
-        public Callback(int pos, List<String> itemname, List<String> describe, ArrayAdapter<String> adapter, List<Bitmap> covers) {
+        public Callback(int pos, List<String> itemname, List<String> describe, List<Integer> ids, ArrayAdapter<String> adapter, List<Bitmap> covers) {
             this.pos = pos;
             this.itemname = itemname;
             this.describe = describe;
+            this.ids = ids;
             this.adapter = adapter;
             this.covers = covers;
 
@@ -112,7 +113,7 @@ public class CustomListAdapter extends ArrayAdapter<String> {
 
         if (!downloaded.get(position)) {
 
-            Callback callback = new Callback(position,itemname, describe, this, covers );
+            Callback callback = new Callback(position,itemname, describe,ids, this, covers );
             RajceAPI.getInstance().getAlbumList(callback, position - 1, REFRESH_COUNT , mHandler );
             int bound = Math.min((REFRESH_COUNT + position), downloaded.size());
             for (int i = position; i < bound; i++) {
