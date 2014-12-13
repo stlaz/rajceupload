@@ -28,6 +28,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -225,7 +226,7 @@ public class NewAlbum extends Activity {
 
                     @Override
                     public void finish() {
-                        Toast.makeText(getApplicationContext(), "Fotografie byly úspěšně nahrány", Toast.LENGTH_SHORT);
+                        backToGallery();
                     }
                 },  photos,
                 mHandler
@@ -272,7 +273,7 @@ public class NewAlbum extends Activity {
 
                     @Override
                     public void finish() {
-
+                        backToGallery();
                     }
                 },
                 videos,
@@ -301,7 +302,23 @@ public class NewAlbum extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onBackPressed() {
+        if (formView.getVisibility() == View.VISIBLE) {
+            Intent i = new Intent(getApplicationContext(), OldNewDialog.class);
+            startActivity(i);
+            finish();
+        }
+        else {
+            backToGallery();
+        }
+    }
+
     public void onBackButtonClicked(View view) {
+        backToGallery();
+    }
+
+    public void backToGallery() {
         selIDs.clear();
         Intent intent = new Intent("clearList");
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
