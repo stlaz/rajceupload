@@ -1,7 +1,9 @@
 package rajce.rajceUploader;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
@@ -29,11 +31,9 @@ import rajce.rajceUploader.network.info.APIStateGetAlbumList;
 public class OldNewDialog extends ListActivity {
 
     private Handler mHandler;
-    private final int INIT_COUNT = 10;
-    ListView listView, listView2;
+    private final int INIT_COUNT = 10; // o kolika albech se ma na zacatku stahnout info
     private Bundle selectedMedia;
     private List<Long> selIDs;
-    //private Handler mHandler;
 
     private AlbumListResponse initAlbumsList;
 
@@ -62,7 +62,7 @@ public class OldNewDialog extends ListActivity {
             @Override
             public void setAlbumList(AlbumListResponse albumList) {
                 initAlbumsList = albumList;
-                itemname = new String[initAlbumsList.totalCount + 1];
+                itemname = new String[initAlbumsList.totalCount + 1];  // +1 protoze je tam jeste polozka "Vytvorit album"
                 describe = new String[initAlbumsList.totalCount + 1];
                 ids = new Integer[initAlbumsList.totalCount + 1];
                 downloaded = new ArrayList<Boolean>();
@@ -126,12 +126,22 @@ public class OldNewDialog extends ListActivity {
             startActivity(i);
         }
         else {
-            //String SelectedItem= (String)getListAdapter().getItem(position);
-//            Toast.makeText(this, SelectedItem, Toast.LENGTH_SHORT).show();
-            Intent i = new Intent(getApplicationContext(), CurrentAlbum.class);
-            i.putExtra("KEY_ALBUM_NAME",(String)getListAdapter().getItem(position));
-            i.putExtra("KEY_ALBUM_ID",ids[position]);
-            startActivity(i);
+
+            final Integer position_ = position;
+            new AlertDialog.Builder(this)
+                    .setTitle("Potvrzení")
+                    .setMessage("Nahrát do alba '" + (String)getListAdapter().getItem(position_) + "' ?" )
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+
+                        public void onClick(DialogInterface dialog, int whichButton) {
+
+                            Intent i = new Intent(getApplicationContext(), CurrentAlbum.class);
+                            i.putExtra("KEY_ALBUM_NAME",(String)getListAdapter().getItem(position_));
+                            i.putExtra("KEY_ALBUM_ID",ids[position_]);
+                            startActivity(i);
+                        }})
+                    .setNegativeButton("Zpět", null).show();
+
         }
 
     }

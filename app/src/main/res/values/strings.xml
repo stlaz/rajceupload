@@ -8,7 +8,7 @@
     <string name="action_next">Dále</string>
     <string name="action_down">Výběr</string>
     <!-- \u00A0 je nedelitelna mezera (pro dostatek mista pred sipkou zpet) -->
-    <string name="title_activity_old_new_dialog">\u00A0Nahrávání</string>
+    <string name="title_activity_old_new_dialog">\u00A0Vybrat album</string>
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_new_album">\u00A0Nové album</string>
     <string name="album_name">Název alba</string>
@@ -25,6 +25,6 @@
         <item>Přidat do stávajícího</item>
     </string-array>
 
-    <string name="title_activity_current_album">Přidat do alba</string>
+    <string name="title_activity_current_album">\u00A0Přidat do alba</string>
 
 </resources>
