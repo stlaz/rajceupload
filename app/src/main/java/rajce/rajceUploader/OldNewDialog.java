@@ -119,9 +119,11 @@ public class OldNewDialog extends ListActivity {
         if (position==0) {
             Intent i = new Intent(getApplicationContext(), NewAlbum.class);
             startActivity(i);
+            finish();
         }
         else {
             String SelectedItem= (String)getListAdapter().getItem(position);
+            finish();
 //            Toast.makeText(this, SelectedItem, Toast.LENGTH_SHORT).show();
         }
 

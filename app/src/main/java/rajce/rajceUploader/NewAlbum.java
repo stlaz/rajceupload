@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -141,6 +142,9 @@ public class NewAlbum extends Activity {
             @Override
             public void onClick(View v) {
                 submitButton.setEnabled(false);
+                // hide keyboard
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
                 showProgress(true);
                 setTitle("Nahrávání");
                 percentage.setText("0%");
@@ -294,6 +298,10 @@ public class NewAlbum extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void onBackButtonClicked(View view) {
+        this.finish();
     }
 
     public void onSubmitClicked(View view) {
