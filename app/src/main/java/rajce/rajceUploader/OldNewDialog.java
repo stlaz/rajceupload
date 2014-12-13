@@ -124,7 +124,6 @@ public class OldNewDialog extends ListActivity {
         if (position==0) {
             Intent i = new Intent(getApplicationContext(), NewAlbum.class);
             startActivity(i);
-            finish();
         }
         else {
 
@@ -143,7 +142,6 @@ public class OldNewDialog extends ListActivity {
                         }})
                     .setNegativeButton("Zpět", null).show();
 
-            finish();
         }
 
     }
