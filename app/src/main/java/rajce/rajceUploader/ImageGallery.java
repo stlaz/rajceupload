@@ -88,7 +88,16 @@ public class ImageGallery extends FragmentActivity implements
         @Override
         public void onReceive(Context context, Intent intent) {
             // Extract data included in the Intent
-            selIDs.clear();
+            if(selIDs.contains(-1L)) { // fotky
+                selIDs.clear();
+                selIDs.add(-1L);
+            }
+            else if(selIDs.contains(-2L)) { // videa
+                selIDs.clear();
+                selIDs.add(-2L);
+            }
+            else
+                Log.e("SELIDS", "Error");
             imageAdapter.notifyDataSetChanged();
         }
     };

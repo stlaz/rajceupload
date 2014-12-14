@@ -161,6 +161,9 @@ public class NewAlbum extends Activity {
                         else if(selIDs.contains(-2L)) { // nahravame videa
                             uploadVideos(id);
                         }
+                        else
+                            Log.e("SELIDS", "Error");
+
 
                     }
 
@@ -319,7 +322,6 @@ public class NewAlbum extends Activity {
     }
 
     public void backToGallery() {
-        selIDs.clear();
         Intent intent = new Intent("clearList");
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         finish();
