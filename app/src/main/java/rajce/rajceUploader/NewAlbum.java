@@ -194,7 +194,10 @@ public class NewAlbum extends Activity {
                     @Override
                     public void changeStat(int newStat) {
                         percentage.setText(newStat + "%");
-                        if(newStat == 100) percentage.setText("Nahrávání dokončeno");
+                        if(newStat == 100)  {
+                            percentage.setText("Nahrávání dokončeno");
+                            findViewById(R.id.upload_progress).setVisibility(View.INVISIBLE);
+                        }
                         // Dale nasleduje vytvoreni notifikace
                         Context ctx = getApplicationContext();
                         Intent notificationIntent = new Intent(ctx, NewAlbum.class);
@@ -241,7 +244,10 @@ public class NewAlbum extends Activity {
                     @Override
                     public void changeStat(int newStat) {
                         percentage.setText(newStat + "%");
-                        if(newStat == 100) percentage.setText("Nahrávání dokončeno");
+                        if(newStat == 100)  {
+                            percentage.setText("Nahrávání dokončeno");
+                            findViewById(R.id.upload_progress).setVisibility(View.INVISIBLE);
+                        }
                         // dále je tvorba notifikace nahravani videa
                         Context ctx = getApplicationContext();
                         Intent notificationIntent = new Intent(ctx, NewAlbum.class);
